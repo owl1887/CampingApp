@@ -40,6 +40,8 @@ export default function HomeScreen() {
   );
 }
 
+//dodan komentar za komit
+
 const styles = StyleSheet.create({
 
   container: {
