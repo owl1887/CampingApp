@@ -264,3 +264,43 @@ export async function addToWishlist(
     throw error;
   }
 }
+
+export async function removeFromWishlist(
+  kampId: number,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/wishlist/${kampId}`,
+      {
+        method: 'DELETE',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri uklanjanju iz liste želja.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška removeFromWishlist:',
+      error
+    );
+
+    throw error;
+  }
+}

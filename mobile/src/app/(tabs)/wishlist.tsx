@@ -7,21 +7,31 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
 import { useFocusEffect } from 'expo-router';
 
 import { getToken } from '@/services/auth';
-import { getWishlist } from '@/services/api';
+import {
+  getWishlist,
+  removeFromWishlist,
+} from '@/services/api';
 
 
 type WishlistItem = {
-  id: string;
-  kamp_id: string;
-  kamp_naziv: string;
-  kamp_opis: string;
+  id: number;
+  naziv: string;
+  opis: string;
   cijena_po_noci: string;
+  karakteristike?: {
+    wifi?: boolean;
+    struja?: boolean;
+    parking?: boolean;
+  };
+  latitude?: string;
+  longitude?: string;
 };
 
 
@@ -117,6 +127,48 @@ export default function WishlistScreen() {
 
   }
 
+  async function ukloniIzListeZelja(
+  kampId: number
+) {
+
+  try {
+
+    const token = await getToken();
+
+    if (!token) {
+
+      Alert.alert(
+        'Niste prijavljeni',
+        'Morate se prijaviti.'
+      );
+
+      return;
+    }
+
+    await removeFromWishlist(
+      kampId,
+      token
+    );
+
+    // Ponovo učitavamo listu
+    await ucitajListuZelja();
+
+    Alert.alert(
+      'Uspješno',
+      'Kamp je uklonjen iz liste želja.'
+    );
+
+  } catch (error: any) {
+
+    Alert.alert(
+      'Greška',
+      error.message ||
+      'Nije moguće ukloniti kamp iz liste želja.'
+    );
+
+  }
+}
+
 
   return (
 
@@ -159,18 +211,32 @@ export default function WishlistScreen() {
               >
 
                 <Text style={styles.cardTitle}>
-                  {kamp.kamp_naziv}
+                  {kamp.naziv}
                 </Text>
 
 
                 <Text style={styles.description}>
-                  {kamp.kamp_opis}
+                  {kamp.opis}
                 </Text>
 
 
                 <Text style={styles.price}>
                   {kamp.cijena_po_noci} KM / noć
                 </Text>
+
+                <TouchableOpacity
+  style={styles.removeButton}
+  onPress={() =>
+    ukloniIzListeZelja(kamp.id)
+  }
+>
+  <Text style={styles.removeButtonText}>
+    Ukloni iz liste želja
+  </Text>
+</TouchableOpacity>
+
+
+
 
               </View>
 
@@ -188,6 +254,19 @@ export default function WishlistScreen() {
 
 
 const styles = StyleSheet.create({
+
+  removeButton: {
+  marginTop: 15,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+removeButtonText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
