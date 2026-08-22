@@ -1,13 +1,56 @@
+import { useEffect, useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 import CampCard from '@/components/CampCard';
+import { getKampovi } from '@/services/api';
+
+type Kamp = {
+  id: number;
+  naziv: string;
+  opis: string;
+  cijena_po_noci: number;
+};
 
 export default function HomeScreen() {
+
+  const [kampovi, setKampovi] = useState<Kamp[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+
+    async function ucitajKampove() {
+
+      try {
+
+        const podaci = await getKampovi();
+
+        setKampovi(podaci);
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          'Nije moguće učitati kamp mjesta.'
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    }
+
+    ucitajKampove();
+
+  }, []);
 
   return (
     <ScrollView
@@ -15,11 +58,10 @@ export default function HomeScreen() {
       contentContainerStyle={styles.content}
     >
 
-      {/* HEADER */}
-
       <View style={styles.header}>
 
         <View>
+
           <Text style={styles.welcome}>
             Dobrodošli! 👋
           </Text>
@@ -27,6 +69,7 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>
             Pronađite savršeno mjesto za kampovanje.
           </Text>
+
         </View>
 
         <Text style={styles.logo}>
@@ -36,59 +79,47 @@ export default function HomeScreen() {
       </View>
 
 
-      {/* POPULARNA KAMP MJESTA */}
-
       <Text style={styles.sectionTitle}>
-        Popularna kamp mjesta
+        Kamp mjesta
       </Text>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      >
 
-        <CampCard
-          naziv="Kamp Plivsko jezero"
-          opis="Prekrasna lokacija uz jezero."
-          cijena={25}
-        />
-
-        <CampCard
-          naziv="Kamp Una"
-          opis="Mirna lokacija uz rijeku."
-          cijena={22}
-        />
-
-        <CampCard
-          naziv="Kamp Vrbas"
-          opis="Idealno mjesto za odmor."
-          cijena={20}
-        />
-
-      </ScrollView>
+      {loading && (
+        <ActivityIndicator size="large" />
+      )}
 
 
-      {/* AKCIJE */}
+      {error !== '' && (
+        <Text style={styles.error}>
+          {error}
+        </Text>
+      )}
 
-      <Text style={styles.sectionTitle}>
-        Kamp mjesta na akciji
-      </Text>
 
-      <CampCard
-        naziv="Kamp Jajce"
-        opis="Posebna ponuda ovog mjeseca."
-        cijena={18}
-      />
+      {!loading && !error && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
 
-      <CampCard
-        naziv="Kamp Drina"
-        opis="Odlična lokacija za ljubitelje prirode."
-        cijena={20}
-      />
+          {kampovi.map((kamp) => (
+
+            <CampCard
+              key={kamp.id}
+              naziv={kamp.naziv}
+              opis={kamp.opis}
+              cijena={Number(kamp.cijena_po_noci)}
+            />
+
+          ))}
+
+        </ScrollView>
+      )}
 
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
 
@@ -127,7 +158,12 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: 'bold',
     marginBottom: 15,
-    marginTop: 10,
+  },
+
+  error: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
   },
 
 });
