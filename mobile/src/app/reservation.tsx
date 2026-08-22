@@ -1,4 +1,5 @@
 import { getToken } from '@/services/auth';
+import ProtectedScreen from '@/components/protected-screen';
 
 
 import { useState } from 'react';
