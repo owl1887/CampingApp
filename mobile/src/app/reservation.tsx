@@ -95,13 +95,13 @@ if (!token) {
 
 
   return (
+  <ProtectedScreen>
 
     <View style={styles.container}>
 
       <Text style={styles.title}>
         Rezervacija
       </Text>
-
 
       <Text style={styles.label}>
         Kamp ID
@@ -110,7 +110,6 @@ if (!token) {
       <Text style={styles.value}>
         {kampId}
       </Text>
-
 
       <Text style={styles.label}>
         Datum prijave
@@ -123,7 +122,6 @@ if (!token) {
         onChangeText={setDatumPrijave}
       />
 
-
       <Text style={styles.label}>
         Datum odjave
       </Text>
@@ -134,7 +132,6 @@ if (!token) {
         value={datumOdjave}
         onChangeText={setDatumOdjave}
       />
-
 
       <TouchableOpacity
         style={styles.button}
@@ -152,8 +149,8 @@ if (!token) {
 
     </View>
 
-  );
-}
+  </ProtectedScreen>
+);}
 
 
 const styles = StyleSheet.create({
