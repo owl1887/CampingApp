@@ -66,3 +66,49 @@ export async function getKampById(id: number) {
     throw error;
   }
 }
+
+export async function createReservation(
+  kamp_id: number,
+  datum_prijave: string,
+  datum_odjave: string,
+  token: string
+) {
+  try {
+    const response = await fetch(
+      `${API_URL}/rezervacije`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          kamp_id,
+          datum_prijave,
+          datum_odjave,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Greška pri kreiranju rezervacije.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška createReservation:',
+      error
+    );
+
+    throw error;
+  }
+}

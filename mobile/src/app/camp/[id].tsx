@@ -179,10 +179,8 @@ export default function CampDetailsScreen() {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            // Za sada samo vraćamo korisnika
-            // na prethodnu stranicu.
-            router.back();
-          }}
+  router.push(`/reservation?kampId=${kamp.id}`);
+}}
         >
 
           <Text style={styles.buttonText}>
@@ -276,3 +274,4 @@ const styles = StyleSheet.create({
   },
 
 });
+

@@ -1,14 +1,123 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useState } from 'react';
+
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import { router } from 'expo-router';
 
+const API_URL = 'http://10.0.2.2:3000/api';
+
 export default function LoginScreen() {
+
+  const [email, setEmail] = useState('');
+  const [lozinka, setLozinka] = useState('');
+  const [loading, setLoading] = useState(false);
+
+
+  async function prijava() {
+
+    if (!email || !lozinka) {
+
+      Alert.alert(
+        'Greška',
+        'Unesite email i lozinku.'
+      );
+
+      return;
+    }
+
+
+    try {
+
+      setLoading(true);
+
+
+      const response = await fetch(
+        `${API_URL}/auth/login`,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            email: email,
+            lozinka: lozinka,
+          }),
+        }
+      );
+
+
+      const data = await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          'Prijava nije uspjela.'
+        );
+
+      }
+
+
+      // Čuvanje JWT tokena
+      await AsyncStorage.setItem(
+        'token',
+        data.token
+      );
+
+
+      // Čuvanje podataka o korisniku
+      await AsyncStorage.setItem(
+        'korisnik',
+        JSON.stringify(data.korisnik)
+      );
+
+
+      Alert.alert(
+        'Uspješna prijava',
+        `Dobrodošli, ${data.korisnik.ime_prezime}!`
+      );
+
+
+      // Prelazak na početnu stranicu
+      router.replace('/(tabs)');
+
+
+    } catch (error: any) {
+
+      console.error(
+        'Greška pri prijavi:',
+        error
+      );
+
+
+      Alert.alert(
+        'Greška',
+        error.message ||
+        'Nije moguće izvršiti prijavu.'
+      );
+
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  }
+
+
   return (
     <View style={styles.container}>
 
@@ -16,45 +125,60 @@ export default function LoginScreen() {
         CampingApp
       </Text>
 
+
       <Text style={styles.subtitle}>
         Prijava
       </Text>
+
 
       <TextInput
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
+
 
       <TextInput
         style={styles.input}
         placeholder="Lozinka"
         secureTextEntry
+        value={lozinka}
+        onChangeText={setLozinka}
       />
+
 
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => {
-          // Login ćemo povezati sa API-jem kasnije
-        }}
+        onPress={prijava}
+        disabled={loading}
       >
+
         <Text style={styles.loginButtonText}>
-          PRIJAVA
+          {loading
+            ? 'PRIJAVA...'
+            : 'PRIJAVA'}
         </Text>
+
       </TouchableOpacity>
+
 
       <TouchableOpacity
         onPress={() => router.push('/register')}
       >
+
         <Text style={styles.registerText}>
           Nemate račun? Registrujte se
         </Text>
+
       </TouchableOpacity>
 
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
 
