@@ -1,3 +1,4 @@
+
 import { useCallback, useState } from 'react';
 
 import {
@@ -7,13 +8,17 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
 import { useFocusEffect } from 'expo-router';
 
 import { getToken } from '@/services/auth';
-import { getMojeRezervacije } from '@/services/api';
+import {
+  getMojeRezervacije,
+  cancelReservation,
+} from '@/services/api';
 
 
 type Rezervacija = {
@@ -94,7 +99,75 @@ export default function ReservationsScreen() {
 
     }, [])
   );
+//funkcija za otkazivanje rervazijaaaaaaaa
 
+
+  async function otkaziRezervaciju(
+  rezervacijaId: string
+) {
+
+  Alert.alert(
+    'Otkazivanje rezervacije',
+    'Da li ste sigurni da želite otkazati ovu rezervaciju?',
+    [
+      {
+        text: 'Ne',
+        style: 'cancel',
+      },
+
+      {
+        text: 'Da',
+        style: 'destructive',
+
+        async onPress() {
+
+          try {
+
+            const token = await getToken();
+
+            if (!token) {
+
+              Alert.alert(
+                'Niste prijavljeni',
+                'Morate se prijaviti.'
+              );
+
+              return;
+            }
+
+
+            await cancelReservation(
+              rezervacijaId,
+              token
+            );
+
+
+            Alert.alert(
+              'Uspješno',
+              'Rezervacija je otkazana.'
+            );
+
+
+            await ucitajRezervacije();
+
+
+          } catch (error: any) {
+
+            Alert.alert(
+              'Greška',
+              error.message ||
+              'Nije moguće otkazati rezervaciju.'
+            );
+
+          }
+
+        },
+      },
+    ]
+  );
+}
+
+//osvjezi rezervacije
 
   async function osvjeziRezervacije() {
 
@@ -228,6 +301,24 @@ export default function ReservationsScreen() {
                   Status:{' '}
                   {rezervacija.status}
                 </Text>
+                {rezervacija.status === 'aktivna' && (
+
+  <TouchableOpacity
+    style={styles.cancelButton}
+    onPress={() =>
+      otkaziRezervaciju(rezervacija.id)
+    }
+  >
+
+    <Text style={styles.cancelButtonText}>
+      OTKAŽI REZERVACIJU
+    </Text>
+
+  </TouchableOpacity>
+
+)}
+
+                
 
               </View>
 
@@ -245,6 +336,19 @@ export default function ReservationsScreen() {
 
 
 const styles = StyleSheet.create({
+
+  cancelButton: {
+  marginTop: 15,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+cancelButtonText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
