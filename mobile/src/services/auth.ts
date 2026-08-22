@@ -119,3 +119,9 @@ export async function isAuthenticated(): Promise<boolean> {
   return true;
 
 }
+
+export async function handleUnauthorized() {
+
+  await logout();
+
+}

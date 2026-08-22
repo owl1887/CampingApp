@@ -1,5 +1,39 @@
 const API_URL = 'http://10.0.2.2:3000/api';
 
+import { handleUnauthorized } from '@/services/auth';
+
+
+async function obradiResponse(
+  response: Response
+) {
+
+  if (response.status === 401) {
+
+    await handleUnauthorized();
+
+    throw new Error(
+      'Sesija je istekla. Molimo prijavite se ponovo.'
+    );
+
+  }
+
+
+  const data = await response.json();
+
+  if (!response.ok) {
+
+    throw new Error(
+      data.error ||
+      `HTTP greška: ${response.status}`
+    );
+
+  }
+
+  return data;
+
+}
+
+
 export async function getKampovi() {
   try {
     console.log(
@@ -92,15 +126,7 @@ export async function createReservation(
       }
     );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || 'Greška pri kreiranju rezervacije.'
-      );
-    }
-
-    return data;
+   return await obradiResponse(response);
 
   } catch (error) {
 
