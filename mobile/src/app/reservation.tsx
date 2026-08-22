@@ -1,3 +1,6 @@
+import { getToken } from '@/services/auth';
+
+
 import { useState } from 'react';
 import {
   Alert,
@@ -41,7 +44,19 @@ export default function ReservationScreen() {
      * dodat ćemo ga u sljedećem koraku.
      */
 
-    const token = 'OVDJE_CEMO_DODATI_TOKEN';
+    const token = await getToken();
+
+if (!token) {
+  Alert.alert(
+    'Niste prijavljeni',
+    'Morate se prijaviti prije rezervacije.'
+  );
+
+  router.push('/login');
+  
+
+  return;
+}
 
     try {
 
