@@ -340,3 +340,49 @@ export async function deactivateProfile(token: string) {
     throw error;
   }
 }
+
+export async function registerUser(
+  ime_prezime: string,
+  email: string,
+  lozinka: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/auth/register`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          ime_prezime,
+          email,
+          lozinka,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri registraciji.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška registerUser:',
+      error
+    );
+
+    throw error;
+  }
+}
