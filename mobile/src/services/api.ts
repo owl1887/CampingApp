@@ -112,3 +112,79 @@ export async function createReservation(
     throw error;
   }
 }
+
+export async function getMojeRezervacije(token: string) {
+  try {
+    const response = await fetch(
+      `${API_URL}/rezervacije/moje`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri učitavanju rezervacija.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška getMojeRezervacije:',
+      error
+    );
+
+    throw error;
+  }
+}
+
+export async function cancelReservation(
+  rezervacijaId: string,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/rezervacije/${rezervacijaId}`,
+      {
+        method: 'DELETE',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri otkazivanju rezervacije.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška cancelReservation:',
+      error
+    );
+
+    throw error;
+  }
+}
