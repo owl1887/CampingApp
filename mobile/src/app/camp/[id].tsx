@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { getKampById } from '@/services/api';
+import {
+  getKampById,
+  addToWishlist,
+} from '@/services/api';
+
+import { getToken } from '@/services/auth';
 
 type Kamp = {
   id: number;
@@ -33,6 +40,9 @@ export default function CampDetailsScreen() {
   const [kamp, setKamp] = useState<Kamp | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+    const [dodavanjeWishlist, setDodavanjeWishlist] =
+  useState(false);
+
 
   useEffect(() => {
 
@@ -64,6 +74,60 @@ export default function CampDetailsScreen() {
     ucitajKamp();
 
   }, [id]);
+
+
+  async function dodajUListuZelja() {
+
+  try {
+
+    const token = await getToken();
+
+    if (!token) {
+
+      Alert.alert(
+        'Niste prijavljeni',
+        'Morate se prijaviti prije dodavanja u listu želja.'
+      );
+
+      router.push('/login');
+
+      return;
+    }
+
+
+    setDodavanjeWishlist(true);
+
+
+    if (!kamp) {
+  return;
+}
+
+await addToWishlist(
+  kamp.id,
+  token
+);
+
+
+    Alert.alert(
+      'Uspješno',
+      'Kamp mjesto je dodano u listu želja.'
+    );
+
+
+  } catch (error: any) {
+
+    Alert.alert(
+      'Greška',
+      error.message ||
+      'Nije moguće dodati kamp u listu želja.'
+    );
+
+  } finally {
+
+    setDodavanjeWishlist(false);
+
+  }
+}
 
 
   if (loading) {
@@ -177,6 +241,19 @@ export default function CampDetailsScreen() {
         {/* Rezervacija */}
 
         <TouchableOpacity
+  style={styles.wishlistButton}
+  onPress={dodajUListuZelja}
+  disabled={dodavanjeWishlist}
+>
+  <Text style={styles.wishlistButtonText}>
+    {dodavanjeWishlist
+      ? 'Dodavanje...'
+      : '♡ Dodaj u listu želja'}
+  </Text>
+</TouchableOpacity>
+
+
+        <TouchableOpacity
           style={styles.button}
           onPress={() => {
   router.push(`/reservation?kampId=${kamp.id}`);
@@ -197,6 +274,19 @@ export default function CampDetailsScreen() {
 
 
 const styles = StyleSheet.create({
+
+    wishlistButton: {
+  marginTop: 20,
+  padding: 15,
+  borderRadius: 10,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+wishlistButtonText: {
+  fontSize: 17,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,

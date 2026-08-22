@@ -188,3 +188,79 @@ export async function cancelReservation(
     throw error;
   }
 }
+
+export async function getWishlist(token: string) {
+  try {
+    const response = await fetch(
+      `${API_URL}/wishlist`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri učitavanju liste želja.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška getWishlist:',
+      error
+    );
+
+    throw error;
+  }
+}
+
+export async function addToWishlist(
+  kampId: number,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/wishlist/${kampId}`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri dodavanju u listu želja.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška addToWishlist:',
+      error
+    );
+
+    throw error;
+  }
+}
