@@ -38,6 +38,56 @@ export default function ReservationScreen() {
       return;
     }
 
+    const datumRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+if (
+  !datumRegex.test(datumPrijave) ||
+  !datumRegex.test(datumOdjave)
+) {
+  Alert.alert(
+    'Greška',
+    'Datum mora biti u formatu YYYY-MM-DD.'
+  );
+
+  return;
+}
+
+const prijava = new Date(`${datumPrijave}T00:00:00`);
+const odjava = new Date(`${datumOdjave}T00:00:00`);
+
+if (
+  Number.isNaN(prijava.getTime()) ||
+  Number.isNaN(odjava.getTime())
+) {
+  Alert.alert(
+    'Greška',
+    'Uneseni datum nije ispravan.'
+  );
+
+  return;
+}
+
+const danas = new Date();
+danas.setHours(0, 0, 0, 0);
+
+if (prijava < danas) {
+  Alert.alert(
+    'Greška',
+    'Datum prijave ne može biti u prošlosti.'
+  );
+
+  return;
+}
+
+if (odjava <= prijava) {
+  Alert.alert(
+    'Greška',
+    'Datum odjave mora biti nakon datuma prijave.'
+  );
+
+  return;
+}
+
     /*
      * Privremeno uzimamo token iz AsyncStorage-a.
      *
