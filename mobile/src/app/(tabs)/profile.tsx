@@ -14,6 +14,7 @@ import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { logout } from '@/services/auth';
+import { deactivateProfile } from '@/services/api';
 
 
 type Korisnik = {
@@ -95,6 +96,73 @@ export default function ProfileScreen() {
 
   }
 
+  async function deaktivirajProfil() {
+
+  Alert.alert(
+    'Deaktivacija računa',
+    'Da li ste sigurni da želite deaktivirati svoj račun?',
+    [
+      {
+        text: 'Odustani',
+        style: 'cancel',
+      },
+
+      {
+        text: 'Deaktiviraj',
+        style: 'destructive',
+
+        onPress: async () => {
+
+          try {
+
+            const token =
+              await AsyncStorage.getItem('token');
+
+            if (!token) {
+
+              Alert.alert(
+                'Greška',
+                'Niste prijavljeni.'
+              );
+
+              return;
+            }
+
+
+            await deactivateProfile(token);
+
+
+            // Brišemo podatke prijavljenog korisnika
+            await logout();
+
+
+            setKorisnik(null);
+
+
+            Alert.alert(
+              'Račun deaktiviran',
+              'Vaš korisnički račun je uspješno deaktiviran.'
+            );
+
+
+            router.replace('/login');
+
+          } catch (error: any) {
+
+            Alert.alert(
+              'Greška',
+              error.message ||
+              'Nije moguće deaktivirati račun.'
+            );
+
+          }
+
+        },
+      },
+    ]
+  );
+}
+
 
   if (loading) {
 
@@ -151,6 +219,8 @@ export default function ProfileScreen() {
 
         </TouchableOpacity>
 
+        
+
       </View>
     );
 
@@ -195,12 +265,36 @@ export default function ProfileScreen() {
 
       </TouchableOpacity>
 
+      <TouchableOpacity
+  style={styles.deleteButton}
+  onPress={deaktivirajProfil}
+>
+  <Text style={styles.deleteButtonText}>
+    DEAKTIVIRAJ RAČUN
+  </Text>
+</TouchableOpacity>
+
     </View>
   );
 }
 
 
 const styles = StyleSheet.create({
+
+  deleteButton: {
+  width: '80%',
+  height: 50,
+  borderRadius: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: 20,
+  borderWidth: 1,
+},
+
+deleteButtonText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,

@@ -304,3 +304,39 @@ export async function removeFromWishlist(
     throw error;
   }
 }
+
+export async function deactivateProfile(token: string) {
+  try {
+    const response = await fetch(
+      `${API_URL}/auth/profile`,
+      {
+        method: 'DELETE',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Nije moguće deaktivirati korisnički profil.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška deactivateProfile:',
+      error
+    );
+
+    throw error;
+  }
+}
