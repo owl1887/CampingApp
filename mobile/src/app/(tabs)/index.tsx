@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+
 import {
   ActivityIndicator,
   ScrollView,
@@ -19,6 +21,7 @@ type Kamp = {
 
 export default function HomeScreen() {
 
+const router = useRouter();
   const [kampovi, setKampovi] = useState<Kamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,7 +66,7 @@ export default function HomeScreen() {
         <View>
 
           <Text style={styles.welcome}>
-            Dobrodošli! 👋
+            Dobrodošli!
           </Text>
 
           <Text style={styles.subtitle}>
@@ -105,11 +108,14 @@ export default function HomeScreen() {
           {kampovi.map((kamp) => (
 
             <CampCard
-              key={kamp.id}
-              naziv={kamp.naziv}
-              opis={kamp.opis}
-              cijena={Number(kamp.cijena_po_noci)}
-            />
+  key={kamp.id}
+  naziv={kamp.naziv}
+  opis={kamp.opis}
+  cijena={Number(kamp.cijena_po_noci)}
+  onPress={() => {
+    router.push(`/camp/${kamp.id}`);
+  }}
+/>
 
           ))}
 
