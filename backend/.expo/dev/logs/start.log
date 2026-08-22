@@ -1,0 +1,7 @@
+{"_e":"root:init","_t":1787412565736,"format":"v0-jsonl","version":"57.0.17"}
+{"_e":"env:mode","_t":1787412565739,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1787412565753,"mode":"development","files":["../..\\..\\.env"],"env":{"DB_HOST":"localhost","DB_NAME":"postgres","DB_PASSWORD":"1536","DB_PORT":"5432","DB_USER":"postgres","JWT_SECRET":"moja_super_tajna_jwt_kljuc_2026"}}
+{"_e":"devserver:start","_t":1787412570415,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1787412586974,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1787412597981,"plugins":[]}
+{"_e":"metro:instantiate","_t":1787412621010,"atlas":false,"workers":6,"host":"::","port":8081}
