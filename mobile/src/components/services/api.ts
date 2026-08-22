@@ -1,20 +1,20 @@
 const API_URL = 'http://10.0.2.2:3000/api';
 
 export async function getKampovi() {
-
   try {
-
-    console.log('Šaljem zahtjev na:', `${API_URL}/kampovi`);
+    console.log(
+      'Šaljem zahtjev:',
+      `${API_URL}/kampovi`
+    );
 
     const response = await fetch(
       `${API_URL}/kampovi`
     );
 
-    console.log('HTTP status:', response.status);
-
-    const text = await response.text();
-
-    console.log('Odgovor servera:', text);
+    console.log(
+      'HTTP status:',
+      response.status
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -22,12 +22,19 @@ export async function getKampovi() {
       );
     }
 
-    return JSON.parse(text);
+    const data = await response.json();
+
+    console.log(
+      'Kampovi:',
+      data
+    );
+
+    return data;
 
   } catch (error) {
 
     console.error(
-      'Greška u getKampovi():',
+      'Greška getKampovi:',
       error
     );
 
