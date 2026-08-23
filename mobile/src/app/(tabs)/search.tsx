@@ -20,6 +20,12 @@ type Kamp = {
   naziv: string;
   opis: string;
   cijena_po_noci: number;
+
+  karakteristike?: {
+    wifi?: boolean;
+    struja?: boolean;
+    parking?: boolean;
+  };
 };
 
 
@@ -36,8 +42,19 @@ export default function SearchScreen() {
   const [minimalnaCijena, setMinimalnaCijena] =
     useState('');
 
+
+
   const [maksimalnaCijena, setMaksimalnaCijena] =
     useState('');
+
+    const [wifiFilter, setWifiFilter] =
+  useState(false);
+
+const [strujaFilter, setStrujaFilter] =
+  useState(false);
+
+const [parkingFilter, setParkingFilter] =
+  useState(false);
 
   const [primijeniFilter, setPrimijeniFilter] =
     useState(false);
@@ -128,17 +145,53 @@ export default function SearchScreen() {
       // MAKSIMALNA CIJENA
 
       if (
-        maksimalnaCijena &&
-        Number(kamp.cijena_po_noci) >
-        Number(maksimalnaCijena)
-      ) {
+  maksimalnaCijena &&
+  Number(kamp.cijena_po_noci) >
+  Number(maksimalnaCijena)
+) {
 
-        return false;
+  return false;
 
-      }
+}
 
 
-      return true;
+// WIFI
+
+if (
+  wifiFilter &&
+  !kamp.karakteristike?.wifi
+) {
+
+  return false;
+
+}
+
+
+// STRUJA
+
+if (
+  strujaFilter &&
+  !kamp.karakteristike?.struja
+) {
+
+  return false;
+
+}
+
+
+// PARKING
+
+if (
+  parkingFilter &&
+  !kamp.karakteristike?.parking
+) {
+
+  return false;
+
+}
+
+
+return true;
 
     });
 
@@ -152,13 +205,19 @@ export default function SearchScreen() {
 
   function resetujFiltere() {
 
-    setMinimalnaCijena('');
+  setMinimalnaCijena('');
 
-    setMaksimalnaCijena('');
+  setMaksimalnaCijena('');
 
-    setPrimijeniFilter(false);
+  setWifiFilter(false);
 
-  }
+  setStrujaFilter(false);
+
+  setParkingFilter(false);
+
+  setPrimijeniFilter(false);
+
+}
 
 
   if (loading) {
@@ -276,6 +335,60 @@ export default function SearchScreen() {
 
       </View>
 
+      <View style={styles.featuresRow}>
+
+  <TouchableOpacity
+    style={[
+      styles.featureButton,
+      wifiFilter && styles.featureButtonActive,
+    ]}
+    onPress={() =>
+      setWifiFilter(!wifiFilter)
+    }
+  >
+
+    <Text style={styles.featureButtonText}>
+      📶 WiFi
+    </Text>
+
+  </TouchableOpacity>
+
+
+  <TouchableOpacity
+    style={[
+      styles.featureButton,
+      strujaFilter && styles.featureButtonActive,
+    ]}
+    onPress={() =>
+      setStrujaFilter(!strujaFilter)
+    }
+  >
+
+    <Text style={styles.featureButtonText}>
+      ⚡ Struja
+    </Text>
+
+  </TouchableOpacity>
+
+
+  <TouchableOpacity
+    style={[
+      styles.featureButton,
+      parkingFilter && styles.featureButtonActive,
+    ]}
+    onPress={() =>
+      setParkingFilter(!parkingFilter)
+    }
+  >
+
+    <Text style={styles.featureButtonText}>
+      🚗 Parking
+    </Text>
+
+  </TouchableOpacity>
+
+</View>
+
 
       {/* REZULTATI */}
 
@@ -353,6 +466,29 @@ export default function SearchScreen() {
 
 
 const styles = StyleSheet.create({
+
+  featuresRow: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  gap: 10,
+  marginBottom: 15,
+},
+
+featureButton: {
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  borderRadius: 8,
+  borderWidth: 1,
+},
+
+featureButtonActive: {
+  borderWidth: 2,
+},
+
+featureButtonText: {
+  fontSize: 14,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
