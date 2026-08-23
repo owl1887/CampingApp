@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import MapView, { Marker } from 'react-native-maps';
 
 import {
   getKampById,
@@ -219,23 +220,38 @@ await addToWishlist(
 
         {/* Lokacija */}
 
-        {kamp.latitude && kamp.longitude && (
+        {kamp.latitude !== undefined &&
+ kamp.longitude !== undefined && (
 
-          <>
-            <Text style={styles.sectionTitle}>
-              Lokacija
-            </Text>
+  <>
+    <Text style={styles.sectionTitle}>
+      Lokacija
+    </Text>
 
-            <Text>
-              Latitude: {kamp.latitude}
-            </Text>
+    <MapView
+      style={styles.map}
+      initialRegion={{
+        latitude: Number(kamp.latitude),
+        longitude: Number(kamp.longitude),
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }}
+    >
 
-            <Text>
-              Longitude: {kamp.longitude}
-            </Text>
-          </>
+      <Marker
+        coordinate={{
+          latitude: Number(kamp.latitude),
+          longitude: Number(kamp.longitude),
+        }}
+        title={kamp.naziv}
+        description="Lokacija kamp mjesta"
+      />
 
-        )}
+    </MapView>
+
+  </>
+
+)}
 
 
         {/* Rezervacija */}
@@ -362,6 +378,15 @@ wishlistButtonText: {
     fontSize: 16,
     textAlign: 'center',
   },
+
+  map: {
+  width: '100%',
+  height: 250,
+  borderRadius: 12,
+  marginBottom: 20,
+},
+
+
 
 });
 
