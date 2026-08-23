@@ -1,4 +1,9 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 type CampCardProps = {
   naziv: string;
@@ -13,67 +18,169 @@ export default function CampCard({
   cijena,
   onPress,
 }: CampCardProps) {
+
   return (
+
     <TouchableOpacity
       style={styles.card}
       onPress={onPress}
+      activeOpacity={0.85}
     >
+
+      {/* Slika kampa */}
+
       <View style={styles.imagePlaceholder}>
-        <Text>SLIKA KAMPA</Text>
+
+        <Text style={styles.imageIcon}>
+          ⛺
+        </Text>
+
+        <Text style={styles.imageText}>
+          Kamp mjesto
+        </Text>
+
       </View>
+
+
+      {/* Sadržaj kartice */}
 
       <View style={styles.content}>
 
-        <Text style={styles.title}>
+        <Text
+          style={styles.title}
+          numberOfLines={1}
+        >
           {naziv}
         </Text>
 
-        <Text style={styles.description}>
+
+        <Text
+          style={styles.description}
+          numberOfLines={2}
+        >
           {opis}
         </Text>
 
-        <Text style={styles.price}>
-          {cijena} € / noć
-        </Text>
+
+        <View style={styles.bottomRow}>
+
+          <View>
+
+            <Text style={styles.priceLabel}>
+              Cijena
+            </Text>
+
+            <Text style={styles.price}>
+              {cijena} KM
+              <Text style={styles.priceNight}>
+                {' '} / noć
+              </Text>
+            </Text>
+
+          </View>
+
+
+          <View style={styles.detailsButton}>
+
+            <Text style={styles.detailsButtonText}>
+              DETALJI
+            </Text>
+
+          </View>
+
+        </View>
 
       </View>
+
     </TouchableOpacity>
   );
 }
 
+
 const styles = StyleSheet.create({
 
   card: {
-    width: 280,
-    borderRadius: 15,
+    width: 285,
+    borderRadius: 16,
     borderWidth: 1,
     overflow: 'hidden',
     marginRight: 15,
   },
 
+
   imagePlaceholder: {
-    height: 150,
+    height: 155,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+
+  imageIcon: {
+    fontSize: 42,
+    marginBottom: 5,
+  },
+
+
+  imageText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
 
   content: {
     padding: 15,
   },
 
+
   title: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 7,
   },
+
 
   description: {
     fontSize: 14,
-    marginBottom: 10,
+    lineHeight: 20,
+    marginBottom: 15,
   },
 
+
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+
+
+  priceLabel: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+
+
   price: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+
+  priceNight: {
+    fontSize: 13,
+    fontWeight: 'normal',
+  },
+
+
+  detailsButton: {
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+
+
+  detailsButtonText: {
+    fontSize: 12,
     fontWeight: 'bold',
   },
 
