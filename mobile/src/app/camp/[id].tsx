@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import MapView, { Marker } from 'react-native-maps';
+import {
+  Map,
+  Camera,
+  Marker,
+} from '@maplibre/maplibre-react-native';
 
 import {
   getKampById,
@@ -218,9 +222,9 @@ await addToWishlist(
         </View>
 
 
-        {/* Lokacija */}
+       {/* Lokacija */}
 
-        {kamp.latitude !== undefined &&
+{kamp.latitude !== undefined &&
  kamp.longitude !== undefined && (
 
   <>
@@ -228,26 +232,36 @@ await addToWishlist(
       Lokacija
     </Text>
 
-    <MapView
+    <Map
       style={styles.map}
-      initialRegion={{
-        latitude: Number(kamp.latitude),
-        longitude: Number(kamp.longitude),
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }}
+      mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
 
-      <Marker
-        coordinate={{
-          latitude: Number(kamp.latitude),
-          longitude: Number(kamp.longitude),
+      <Camera
+        initialViewState={{
+          center: [
+            Number(kamp.longitude),
+            Number(kamp.latitude),
+          ],
+          zoom: 14,
         }}
-        title={kamp.naziv}
-        description="Lokacija kamp mjesta"
       />
 
-    </MapView>
+      <Marker
+        id={`kamp-${kamp.id}`}
+        lngLat={[
+          Number(kamp.longitude),
+          Number(kamp.latitude),
+        ]}
+      >
+        <View style={styles.marker}>
+          <Text style={styles.markerText}>
+            📍
+          </Text>
+        </View>
+      </Marker>
+
+    </Map>
 
   </>
 
@@ -290,6 +304,27 @@ await addToWishlist(
 
 
 const styles = StyleSheet.create({
+  
+
+  marker: {
+  width: 30,
+  height: 30,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+markerDot: {
+  width: 18,
+  height: 18,
+  borderRadius: 9,
+  backgroundColor: 'red',
+  borderWidth: 3,
+  borderColor: 'white',
+},
+
+markerText: {
+  fontSize: 30,
+},
 
     wishlistButton: {
   marginTop: 20,
