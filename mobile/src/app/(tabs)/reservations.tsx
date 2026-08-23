@@ -12,7 +12,10 @@ import {
   View,
 } from 'react-native';
 
-import { useFocusEffect } from 'expo-router';
+import {
+  router,
+  useFocusEffect,
+} from 'expo-router';
 
 import { getToken } from '@/services/auth';
 import {
@@ -301,6 +304,22 @@ export default function ReservationsScreen() {
                   Status:{' '}
                   {rezervacija.status}
                 </Text>
+
+                  <TouchableOpacity
+  style={styles.detailsButton}
+  onPress={() =>
+    router.push(
+      `/reservation-details?id=${rezervacija.id}`
+    )
+  }
+>
+
+  <Text style={styles.detailsButtonText}>
+    DETALJI
+  </Text>
+
+</TouchableOpacity>
+
                 {rezervacija.status === 'aktivna' && (
 
   <TouchableOpacity
@@ -336,6 +355,19 @@ export default function ReservationsScreen() {
 
 
 const styles = StyleSheet.create({
+
+  detailsButton: {
+  marginTop: 15,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+detailsButtonText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+},
 
   cancelButton: {
   marginTop: 15,

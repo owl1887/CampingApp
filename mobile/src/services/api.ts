@@ -412,3 +412,43 @@ export async function registerUser(
     throw error;
   }
 }
+
+export async function getReservationById(
+  rezervacijaId: string,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/rezervacije/${rezervacijaId}`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Nije moguće učitati detalje rezervacije.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška getReservationById:',
+      error
+    );
+
+    throw error;
+  }
+}
