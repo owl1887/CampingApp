@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 
+
 import {
   ActivityIndicator,
   ScrollView,
@@ -11,6 +12,7 @@ import {
 
 import CampCard from '@/components/CampCard';
 import { getKampovi } from '@/services/api';
+import CampsMap from '@/components/CampsMap';
 
 type Kamp = {
   id: number;
@@ -122,12 +124,29 @@ const router = useRouter();
         </ScrollView>
       )}
 
+      {!loading && !error && kampovi.length > 0 && (
+
+  <View style={styles.mapSection}>
+
+    <Text style={styles.sectionTitle}>
+      Kampovi na mapi
+    </Text>
+
+    <CampsMap />
+
+  </View>
+
+)}
+
     </ScrollView>
   );
 }
 
 
 const styles = StyleSheet.create({
+  mapSection: {
+  marginTop: 25,
+},
 
   container: {
     flex: 1,
