@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import { useRouter } from 'expo-router';
+
 import {
   Map,
   Camera,
@@ -27,6 +29,8 @@ type Kamp = {
 
 
 export default function CampsMap() {
+
+    const router = useRouter();
 
   const [kampovi, setKampovi] =
     useState<Kamp[]>([]);
@@ -131,29 +135,32 @@ export default function CampsMap() {
 
 
         {kampoviSaKoordinatama.map(
-          (kamp) => (
+  (kamp) => (
 
-            <Marker
-              key={kamp.id}
-              id={`kamp-${kamp.id}`}
-              lngLat={[
-                Number(kamp.longitude),
-                Number(kamp.latitude),
-              ]}
-            >
+    <Marker
+      key={kamp.id}
+      id={`kamp-${kamp.id}`}
+      lngLat={[
+        Number(kamp.longitude),
+        Number(kamp.latitude),
+      ]}
+      onPress={() => {
+        router.push(`/camp/${kamp.id}`);
+      }}
+    >
 
-              <View style={styles.marker}>
+      <View style={styles.marker}>
 
-                <Text style={styles.markerText}>
-                  📍
-                </Text>
+        <Text style={styles.markerText}>
+          📍
+        </Text>
 
-              </View>
+      </View>
 
-            </Marker>
+    </Marker>
 
-          )
-        )}
+  )
+)}
 
       </Map>
 
@@ -162,6 +169,7 @@ export default function CampsMap() {
   );
 
 }
+
 
 
 const styles = StyleSheet.create({
