@@ -33,6 +33,15 @@ export default function SearchScreen() {
   const [pretraga, setPretraga] =
     useState('');
 
+  const [minimalnaCijena, setMinimalnaCijena] =
+    useState('');
+
+  const [maksimalnaCijena, setMaksimalnaCijena] =
+    useState('');
+
+  const [primijeniFilter, setPrimijeniFilter] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -78,21 +87,78 @@ export default function SearchScreen() {
       const tekst =
         pretraga.toLowerCase().trim();
 
-      if (!tekst) {
+
+      // PRETRAGA PO TEKSTU
+
+      const odgovaraTekst =
+        !tekst ||
+        kamp.naziv
+          .toLowerCase()
+          .includes(tekst) ||
+        kamp.opis
+          .toLowerCase()
+          .includes(tekst);
+
+
+      if (!odgovaraTekst) {
+        return false;
+      }
+
+
+      // AKO FILTER NIJE AKTIVAN
+
+      if (!primijeniFilter) {
         return true;
       }
 
-      return (
-        kamp.naziv
-          .toLowerCase()
-          .includes(tekst)
-        ||
-        kamp.opis
-          .toLowerCase()
-          .includes(tekst)
-      );
+
+      // MINIMALNA CIJENA
+
+      if (
+        minimalnaCijena &&
+        Number(kamp.cijena_po_noci) <
+        Number(minimalnaCijena)
+      ) {
+
+        return false;
+
+      }
+
+
+      // MAKSIMALNA CIJENA
+
+      if (
+        maksimalnaCijena &&
+        Number(kamp.cijena_po_noci) >
+        Number(maksimalnaCijena)
+      ) {
+
+        return false;
+
+      }
+
+
+      return true;
 
     });
+
+
+  function primijeniCjenovniFilter() {
+
+    setPrimijeniFilter(true);
+
+  }
+
+
+  function resetujFiltere() {
+
+    setMinimalnaCijena('');
+
+    setMaksimalnaCijena('');
+
+    setPrimijeniFilter(false);
+
+  }
 
 
   if (loading) {
@@ -138,6 +204,8 @@ export default function SearchScreen() {
       </Text>
 
 
+      {/* PRETRAGA */}
+
       <TextInput
         style={styles.searchInput}
         placeholder="Pretraži kampove..."
@@ -145,6 +213,76 @@ export default function SearchScreen() {
         onChangeText={setPretraga}
         autoCapitalize="none"
       />
+
+
+      {/* FILTERI */}
+
+      <Text style={styles.filterTitle}>
+        Cijena po noći
+      </Text>
+
+
+      <View style={styles.priceRow}>
+
+        <TextInput
+          style={styles.priceInput}
+          placeholder="Od"
+          value={minimalnaCijena}
+          onChangeText={setMinimalnaCijena}
+          keyboardType="numeric"
+        />
+
+
+        <Text style={styles.priceSeparator}>
+          -
+        </Text>
+
+
+        <TextInput
+          style={styles.priceInput}
+          placeholder="Do"
+          value={maksimalnaCijena}
+          onChangeText={setMaksimalnaCijena}
+          keyboardType="numeric"
+        />
+
+      </View>
+
+
+      <View style={styles.buttonRow}>
+
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={primijeniCjenovniFilter}
+        >
+
+          <Text style={styles.filterButtonText}>
+            Primijeni filter
+          </Text>
+
+        </TouchableOpacity>
+
+
+        <TouchableOpacity
+          style={styles.resetButton}
+          onPress={resetujFiltere}
+        >
+
+          <Text style={styles.resetButtonText}>
+            Resetuj
+          </Text>
+
+        </TouchableOpacity>
+
+      </View>
+
+
+      {/* REZULTATI */}
+
+      <Text style={styles.resultCount}>
+        Pronađeno:{' '}
+        {filtriraniKampovi.length}
+      </Text>
 
 
       {filtriraniKampovi.length === 0 ? (
@@ -161,6 +299,7 @@ export default function SearchScreen() {
 
         <FlatList
           data={filtriraniKampovi}
+
           keyExtractor={(item) =>
             item.id.toString()
           }
@@ -202,6 +341,7 @@ export default function SearchScreen() {
             </TouchableOpacity>
 
           )}
+
         />
 
       )}
@@ -219,6 +359,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -226,11 +367,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
   },
+
 
   searchInput: {
     height: 50,
@@ -241,9 +384,84 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+
+  filterTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+
+
+  priceInput: {
+    flex: 1,
+    height: 45,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 15,
+  },
+
+
+  priceSeparator: {
+    marginHorizontal: 10,
+    fontSize: 18,
+  },
+
+
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 15,
+  },
+
+
+  filterButton: {
+    flex: 1,
+    padding: 13,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+
+
+  filterButtonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
+
+  resetButton: {
+    padding: 13,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    minWidth: 90,
+  },
+
+
+  resetButtonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
+
+  resultCount: {
+    fontSize: 15,
+    marginBottom: 10,
+  },
+
+
   list: {
     paddingBottom: 20,
   },
+
 
   card: {
     borderWidth: 1,
@@ -252,11 +470,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+
   cardTitle: {
     fontSize: 21,
     fontWeight: 'bold',
     marginBottom: 8,
   },
+
 
   description: {
     fontSize: 14,
@@ -264,26 +484,31 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+
   price: {
     fontSize: 17,
     fontWeight: 'bold',
   },
+
 
   loadingText: {
     marginTop: 10,
     fontSize: 16,
   },
 
+
   error: {
     fontSize: 16,
     textAlign: 'center',
   },
+
 
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
 
   emptyText: {
     fontSize: 17,
