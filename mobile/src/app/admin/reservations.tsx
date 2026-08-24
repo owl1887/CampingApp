@@ -261,79 +261,79 @@ export default function AdminReservationsScreen() {
 
 
               <Text style={styles.label}>
-                Status
-              </Text>
+  Status
+</Text>
 
-              <Text style={styles.status}>
-                {rezervacija.status}
-              </Text>
+<Text style={styles.status}>
+  {rezervacija.status}
+</Text>
 
+<View style={styles.statusButtons}>
 
-              <View style={styles.actions}>
+  {rezervacija.status !== 'aktivna' && (
 
-                {rezervacija.status !== 'aktivna' && (
+    <TouchableOpacity
+      style={styles.statusButton}
+      onPress={() =>
+        promijeniStatus(
+          rezervacija.rezervacija_id,
+          'aktivna'
+        )
+      }
+    >
 
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() =>
-                      promijeniStatus(
-                        rezervacija.rezervacija_id,
-                        'aktivna'
-                      )
-                    }
-                  >
+      <Text style={styles.statusButtonText}>
+        Aktivna
+      </Text>
 
-                    <Text style={styles.actionText}>
-                      Aktivna
-                    </Text>
+    </TouchableOpacity>
 
-                  </TouchableOpacity>
-
-                )}
-
-
-                {rezervacija.status !== 'zavrsena' && (
-
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() =>
-                      promijeniStatus(
-                        rezervacija.rezervacija_id,
-                        'zavrsena'
-                      )
-                    }
-                  >
-
-                    <Text style={styles.actionText}>
-                      Završena
-                    </Text>
-
-                  </TouchableOpacity>
-
-                )}
+  )}
 
 
-                {rezervacija.status !== 'otkazana' && (
+  {rezervacija.status !== 'otkazana' && (
 
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() =>
-                      promijeniStatus(
-                        rezervacija.rezervacija_id,
-                        'otkazana'
-                      )
-                    }
-                  >
+    <TouchableOpacity
+      style={styles.statusButton}
+      onPress={() =>
+        promijeniStatus(
+          rezervacija.rezervacija_id,
+          'otkazana'
+        )
+      }
+    >
 
-                    <Text style={styles.actionText}>
-                      Otkazana
-                    </Text>
+      <Text style={styles.statusButtonText}>
+        Otkazana
+      </Text>
 
-                  </TouchableOpacity>
+    </TouchableOpacity>
 
-                )}
+  )}
 
-              </View>
+
+  {rezervacija.status !== 'zavrsena' && (
+
+    <TouchableOpacity
+      style={styles.statusButton}
+      onPress={() =>
+        promijeniStatus(
+          rezervacija.rezervacija_id,
+          'zavrsena'
+        )
+      }
+    >
+
+      <Text style={styles.statusButtonText}>
+        Završena
+      </Text>
+
+    </TouchableOpacity>
+
+  )}
+
+</View>
+
 
             </View>
 
@@ -350,6 +350,25 @@ export default function AdminReservationsScreen() {
 
 
 const styles = StyleSheet.create({
+
+    statusButtons: {
+  flexDirection: 'row',
+  gap: 8,
+  marginTop: 12,
+},
+
+statusButton: {
+  flex: 1,
+  padding: 10,
+  borderWidth: 1,
+  borderRadius: 8,
+  alignItems: 'center',
+},
+
+statusButtonText: {
+  fontSize: 14,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
