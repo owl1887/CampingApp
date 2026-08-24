@@ -285,6 +285,22 @@ export default function AdminScreen() {
         </Text>
 
       </TouchableOpacity>
+
+      <TouchableOpacity
+  style={styles.addButton}
+  onPress={() =>
+    router.push('/admin/users')
+  }
+>
+
+  <Text style={styles.buttonText}>
+    Korisnici
+  </Text>
+
+</TouchableOpacity>
+
+
+
       <TouchableOpacity
   style={styles.addButton}
   onPress={() =>

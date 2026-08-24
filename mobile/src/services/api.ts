@@ -690,3 +690,180 @@ export async function updateReservationStatus(
     throw error;
   }
 }
+export async function getAllUsers(token: string) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/korisnici/admin/svi`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        'Greška pri učitavanju korisnika.'
+      );
+
+    }
+
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška getAllUsers:',
+      error
+    );
+
+    throw error;
+
+  }
+}
+
+
+export async function updateUserStatus(
+  korisnikId: number,
+  aktivan: boolean,
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/korisnici/admin/${korisnikId}/status`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          aktivan,
+        }),
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        'Greška pri promjeni statusa korisnika.'
+      );
+
+    }
+
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška updateUserStatus:',
+      error
+    );
+
+    throw error;
+
+  }
+}
+
+
+export async function updateUserRole(
+  korisnikId: number,
+  uloga: string,
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/korisnici/admin/${korisnikId}/uloga`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          uloga,
+        }),
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        'Greška pri promjeni uloge korisnika.'
+      );
+
+    }
+
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška updateUserRole:',
+      error
+    );
+
+    throw error;
+
+  }
+}
+export async function activateUser(
+  korisnikId: number,
+  token: string
+) {
+
+  return await updateUserStatus(
+    korisnikId,
+    true,
+    token
+  );
+
+}
+
+
+export async function deactivateUser(
+  korisnikId: number,
+  token: string
+) {
+
+  return await updateUserStatus(
+    korisnikId,
+    false,
+    token
+  );
+
+}
