@@ -15,6 +15,9 @@ const {
     authenticateToken
 } = require('./middleware/auth.middleware');
 
+const korisniciRoutes =
+    require('./routes/korisnici.routes');
+
 
 
 
@@ -64,6 +67,11 @@ app.use(
     '/api/admin',
     adminRoutes
 );
+app.use(
+    '/api/korisnici',
+    korisniciRoutes
+);
+
 
 
 app.listen(PORT, () => {
