@@ -257,6 +257,17 @@ export default function ProfileScreen() {
 
       </View>
 
+      {korisnik.uloga === 'admin' && (
+  <TouchableOpacity
+    style={styles.adminButton}
+    onPress={() => router.push('/admin')}
+  >
+    <Text style={styles.adminButtonText}>
+      ADMIN PANEL
+    </Text>
+  </TouchableOpacity>
+)}
+
 
       <TouchableOpacity
         style={styles.button}
@@ -284,6 +295,21 @@ export default function ProfileScreen() {
 
 
 const styles = StyleSheet.create({
+
+  adminButton: {
+  width: '80%',
+  height: 50,
+  borderRadius: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginBottom: 10,
+  borderWidth: 1,
+},
+
+adminButtonText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+},
 
   deleteButton: {
   width: '80%',

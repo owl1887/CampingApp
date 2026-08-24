@@ -481,3 +481,100 @@ export async function getReservationById(
     throw error;
   }
 }
+
+export async function createCamp(
+  kamp: {
+    naziv: string;
+    opis: string;
+    cijena_po_noci: number;
+    karakteristike: {
+      wifi: boolean;
+      struja: boolean;
+      parking: boolean;
+    };
+    latitude: number | null;
+    longitude: number | null;
+  },
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/kampovi`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify(kamp),
+      }
+    );
+
+
+    return await obradiResponse(response);
+
+
+  } catch (error) {
+
+    console.error(
+      'Greška createCamp:',
+      error
+    );
+
+    throw error;
+
+  }
+}
+export async function updateCamp(
+  id: number,
+  podaci: {
+    naziv: string;
+    opis: string;
+    cijena_po_noci: number;
+    karakteristike: {
+      wifi: boolean;
+      struja: boolean;
+      parking: boolean;
+    };
+    latitude: number | null;
+    longitude: number | null;
+  },
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/kampovi/${id}`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify(podaci),
+      }
+    );
+
+
+    return await obradiResponse(response);
+
+
+  } catch (error) {
+
+    console.error(
+      'Greška updateCamp:',
+      error
+    );
+
+    throw error;
+
+  }
+
+}
