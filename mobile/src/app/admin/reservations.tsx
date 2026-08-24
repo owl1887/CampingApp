@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -15,7 +16,11 @@ import {
 } from 'expo-router';
 
 import { getToken } from '@/services/auth';
-import { getAllReservations } from '@/services/api';
+
+import {
+  getAllReservations,
+  updateReservationStatus,
+} from '@/services/api';
 
 
 type Rezervacija = {
@@ -50,7 +55,6 @@ export default function AdminReservationsScreen() {
       setLoading(true);
 
       const token = await getToken();
-
 
       if (!token) {
 
@@ -99,9 +103,63 @@ export default function AdminReservationsScreen() {
   );
 
 
+  async function promijeniStatus(
+    rezervacijaId: number,
+    noviStatus: string
+  ) {
+
+    try {
+
+      const token =
+        await getToken();
+
+
+      if (!token) {
+
+        router.replace('/login');
+
+        return;
+      }
+
+
+      await updateReservationStatus(
+        rezervacijaId,
+        noviStatus,
+        token
+      );
+
+
+      Alert.alert(
+        'Uspješno',
+        'Status rezervacije je uspješno promijenjen.'
+      );
+
+
+      await ucitajRezervacije();
+
+
+    } catch (error: any) {
+
+      console.error(
+        'Greška pri promjeni statusa:',
+        error
+      );
+
+
+      Alert.alert(
+        'Greška',
+        error.message ||
+        'Nije moguće promijeniti status rezervacije.'
+      );
+
+    }
+  }
+
+
   if (loading) {
 
     return (
+
       <View style={styles.center}>
 
         <ActivityIndicator
@@ -113,6 +171,7 @@ export default function AdminReservationsScreen() {
         </Text>
 
       </View>
+
     );
 
   }
@@ -132,7 +191,7 @@ export default function AdminReservationsScreen() {
 
       {rezervacije.length === 0 ? (
 
-        <View style={styles.center}>
+        <View style={styles.emptyContainer}>
 
           <Text style={styles.emptyText}>
             Trenutno nema rezervacija.
@@ -142,81 +201,151 @@ export default function AdminReservationsScreen() {
 
       ) : (
 
-        rezervacije.map((rezervacija) => (
+        rezervacije.map(
+          (rezervacija) => (
 
-          <View
-            key={rezervacija.rezervacija_id}
-            style={styles.card}
-          >
+            <View
+              key={rezervacija.rezervacija_id}
+              style={styles.card}
+            >
 
-            <Text style={styles.cardTitle}>
-              Rezervacija #
-              {rezervacija.rezervacija_id}
-            </Text>
-
-
-            <Text style={styles.label}>
-              Korisnik
-            </Text>
-
-            <Text style={styles.value}>
-              {rezervacija.korisnik_ime}
-            </Text>
+              <Text style={styles.cardTitle}>
+                Rezervacija #
+                {rezervacija.rezervacija_id}
+              </Text>
 
 
-            <Text style={styles.email}>
-              {rezervacija.korisnik_email}
-            </Text>
+              <Text style={styles.label}>
+                Korisnik
+              </Text>
+
+              <Text style={styles.value}>
+                {rezervacija.korisnik_ime}
+              </Text>
 
 
-            <Text style={styles.label}>
-              Kamp
-            </Text>
-
-            <Text style={styles.value}>
-              {rezervacija.kamp_naziv}
-            </Text>
+              <Text style={styles.email}>
+                {rezervacija.korisnik_email}
+              </Text>
 
 
-            <Text style={styles.label}>
-              Period
-            </Text>
+              <Text style={styles.label}>
+                Kamp
+              </Text>
 
-            <Text style={styles.value}>
-              {rezervacija.datum_prijave}
-              {' → '}
-              {rezervacija.datum_odjave}
-            </Text>
+              <Text style={styles.value}>
+                {rezervacija.kamp_naziv}
+              </Text>
 
 
-            <Text style={styles.label}>
-              Ukupna cijena
-            </Text>
+              <Text style={styles.label}>
+                Period
+              </Text>
 
-            <Text style={styles.price}>
-              {Number(
-                rezervacija.ukupna_cijena
-              ).toFixed(2)} KM
-            </Text>
+              <Text style={styles.value}>
+                {rezervacija.datum_prijave}
+                {' → '}
+                {rezervacija.datum_odjave}
+              </Text>
 
 
-            <Text style={styles.label}>
-              Status
-            </Text>
+              <Text style={styles.label}>
+                Ukupna cijena
+              </Text>
 
-            <Text style={styles.status}>
-              {rezervacija.status}
-            </Text>
+              <Text style={styles.price}>
+                {Number(
+                  rezervacija.ukupna_cijena
+                ).toFixed(2)} KM
+              </Text>
 
-          </View>
 
-        ))
+              <Text style={styles.label}>
+                Status
+              </Text>
+
+              <Text style={styles.status}>
+                {rezervacija.status}
+              </Text>
+
+
+              <View style={styles.actions}>
+
+                {rezervacija.status !== 'aktivna' && (
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() =>
+                      promijeniStatus(
+                        rezervacija.rezervacija_id,
+                        'aktivna'
+                      )
+                    }
+                  >
+
+                    <Text style={styles.actionText}>
+                      Aktivna
+                    </Text>
+
+                  </TouchableOpacity>
+
+                )}
+
+
+                {rezervacija.status !== 'zavrsena' && (
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() =>
+                      promijeniStatus(
+                        rezervacija.rezervacija_id,
+                        'zavrsena'
+                      )
+                    }
+                  >
+
+                    <Text style={styles.actionText}>
+                      Završena
+                    </Text>
+
+                  </TouchableOpacity>
+
+                )}
+
+
+                {rezervacija.status !== 'otkazana' && (
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() =>
+                      promijeniStatus(
+                        rezervacija.rezervacija_id,
+                        'otkazana'
+                      )
+                    }
+                  >
+
+                    <Text style={styles.actionText}>
+                      Otkazana
+                    </Text>
+
+                  </TouchableOpacity>
+
+                )}
+
+              </View>
+
+            </View>
+
+          )
+        )
 
       )}
 
     </ScrollView>
 
   );
+
 }
 
 
@@ -226,10 +355,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+
   content: {
     padding: 20,
     paddingBottom: 40,
   },
+
 
   center: {
     flex: 1,
@@ -238,10 +369,20 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+
   loadingText: {
     marginTop: 10,
     fontSize: 16,
   },
+
 
   title: {
     fontSize: 30,
@@ -249,9 +390,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+
   emptyText: {
     fontSize: 17,
   },
+
 
   card: {
     borderWidth: 1,
@@ -260,11 +403,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+
   cardTitle: {
     fontSize: 21,
     fontWeight: 'bold',
     marginBottom: 15,
   },
+
 
   label: {
     fontSize: 14,
@@ -272,15 +417,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
+
   value: {
     fontSize: 16,
     marginTop: 3,
   },
 
+
   email: {
     fontSize: 14,
     marginTop: 3,
   },
+
 
   price: {
     fontSize: 17,
@@ -288,10 +436,33 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
+
   status: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 3,
+  },
+
+
+  actions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 15,
+  },
+
+
+  actionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+
+
+  actionText: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 
 });

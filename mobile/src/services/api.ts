@@ -646,3 +646,47 @@ export async function getAllReservations(
     throw error;
   }
 }
+export async function updateReservationStatus(
+  rezervacijaId: number,
+  status: string,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/rezervacije/admin/${rezervacijaId}/status`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          status,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri promjeni statusa rezervacije.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška updateReservationStatus:',
+      error
+    );
+
+    throw error;
+  }
+}
