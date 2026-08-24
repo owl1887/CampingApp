@@ -578,3 +578,33 @@ export async function updateCamp(
   }
 
 }
+export async function deleteCamp(
+  id: number,
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/kampovi/${id}`,
+      {
+        method: 'DELETE',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    return await obradiResponse(response);
+
+  } catch (error) {
+
+    console.error(
+      'Greška deleteCamp:',
+      error
+    );
+
+    throw error;
+  }
+}

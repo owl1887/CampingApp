@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { getToken } from '@/services/auth';
 
 import {
   ActivityIndicator,
@@ -20,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getProfile,
   getKampovi,
+  deleteCamp,
 } from '@/services/api';
 
 
@@ -50,6 +52,74 @@ export default function AdminScreen() {
   const [loading, setLoading] =
     useState(true);
 
+    async function deaktivirajKamp(kampId: number) {
+
+  Alert.alert(
+    'Deaktivacija kampa',
+    'Da li ste sigurni da želite deaktivirati ovaj kamp?',
+    [
+      {
+        text: 'Odustani',
+        style: 'cancel',
+      },
+
+      {
+        text: 'Deaktiviraj',
+        style: 'destructive',
+
+        onPress: async () => {
+
+          try {
+
+            const token = await getToken();
+
+            if (!token) {
+
+              Alert.alert(
+                'Greška',
+                'Niste prijavljeni.'
+              );
+
+              return;
+            }
+
+
+            await deleteCamp(
+              kampId,
+              token
+            );
+
+
+            Alert.alert(
+              'Uspješno',
+              'Kamp je uspješno deaktiviran.'
+            );
+
+
+            // Ponovo učitavamo listu kampova
+            await ucitajAdminPodatke();
+
+
+          } catch (error: any) {
+
+            console.error(
+              'Greška pri deaktivaciji kampa:',
+              error
+            );
+
+            Alert.alert(
+              'Greška',
+              error.message ||
+              'Nije moguće deaktivirati kamp.'
+            );
+
+          }
+
+        },
+      },
+    ]
+  );
+}
 
   async function ucitajAdminPodatke() {
 
@@ -268,20 +338,15 @@ export default function AdminScreen() {
 
 
             <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() =>
-                Alert.alert(
-                  'Deaktivacija',
-                  'Ovdje ćemo dodati deaktivaciju kampa.'
-                )
-              }
-            >
-
-              <Text style={styles.buttonText}>
-                Deaktiviraj
-              </Text>
-
-            </TouchableOpacity>
+  style={styles.deleteButton}
+  onPress={() =>
+    deaktivirajKamp(kamp.id)
+  }
+>
+  <Text style={styles.deleteButtonText}>
+    Deaktiviraj
+  </Text>
+</TouchableOpacity>
 
           </View>
 
@@ -297,6 +362,18 @@ export default function AdminScreen() {
 
 
 const styles = StyleSheet.create({
+    deleteButton: {
+  marginTop: 10,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+deleteButtonText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
@@ -404,12 +481,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  deleteButton: {
-    flex: 1,
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
+  
 
 });
