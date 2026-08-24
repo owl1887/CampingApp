@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 
+
+
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +13,8 @@ import {
   View,
 } from 'react-native';
 
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+
 
 import { getToken } from '@/services/auth';
 import {
@@ -36,6 +39,8 @@ type WishlistItem = {
 
 
 export default function WishlistScreen() {
+
+  const router = useRouter();
 
   const [listaZelja, setListaZelja] =
     useState<WishlistItem[]>([]);
@@ -206,39 +211,47 @@ export default function WishlistScreen() {
             (kamp) => (
 
               <View
-                key={kamp.id}
-                style={styles.card}
-              >
-
-                <Text style={styles.cardTitle}>
-                  {kamp.naziv}
-                </Text>
-
-
-                <Text style={styles.description}>
-                  {kamp.opis}
-                </Text>
-
-
-                <Text style={styles.price}>
-                  {kamp.cijena_po_noci} KM / noć
-                </Text>
-
-                <TouchableOpacity
-  style={styles.removeButton}
-  onPress={() =>
-    ukloniIzListeZelja(kamp.id)
-  }
+  key={kamp.id}
+  style={styles.card}
 >
-  <Text style={styles.removeButtonText}>
-    Ukloni iz liste želja
+
+  <Text style={styles.cardTitle}>
+    {kamp.naziv}
   </Text>
-</TouchableOpacity>
+
+  <Text style={styles.description}>
+    {kamp.opis}
+  </Text>
+
+  <Text style={styles.price}>
+    {kamp.cijena_po_noci} KM / noć
+  </Text>
 
 
+  <TouchableOpacity
+    style={styles.detailsButton}
+    onPress={() =>
+      router.push(`/camp/${kamp.id}`)
+    }
+  >
+    <Text style={styles.detailsButtonText}>
+      Detalji
+    </Text>
+  </TouchableOpacity>
 
 
-              </View>
+  <TouchableOpacity
+    style={styles.removeButton}
+    onPress={() =>
+      ukloniIzListeZelja(kamp.id)
+    }
+  >
+    <Text style={styles.removeButtonText}>
+      Ukloni iz liste želja
+    </Text>
+  </TouchableOpacity>
+
+</View>
 
             )
           )}
@@ -254,6 +267,19 @@ export default function WishlistScreen() {
 
 
 const styles = StyleSheet.create({
+
+  detailsButton: {
+  marginTop: 15,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  borderWidth: 1,
+},
+
+detailsButtonText: {
+  fontSize: 15,
+  fontWeight: 'bold',
+},
 
   removeButton: {
   marginTop: 15,
