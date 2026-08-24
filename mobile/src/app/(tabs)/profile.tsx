@@ -14,7 +14,10 @@ import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { logout } from '@/services/auth';
-import { deactivateProfile } from '@/services/api';
+import {
+  deactivateProfile,
+  getProfile,
+} from '@/services/api';
 
 
 type Korisnik = {
@@ -36,42 +39,43 @@ export default function ProfileScreen() {
 
   async function ucitajKorisnika() {
 
-    try {
+  try {
 
-      const token =
-        await AsyncStorage.getItem('token');
+    const token =
+      await AsyncStorage.getItem('token');
 
-      const korisnikPodaci =
-        await AsyncStorage.getItem('korisnik');
-
-
-      if (token && korisnikPodaci) {
-
-        setKorisnik(
-          JSON.parse(korisnikPodaci)
-        );
-
-      } else {
-
-        setKorisnik(null);
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        'Greška pri učitavanju profila:',
-        error
-      );
+    if (!token) {
 
       setKorisnik(null);
 
-    } finally {
-
-      setLoading(false);
-
+      return;
     }
+
+
+    const data =
+      await getProfile(token);
+
+
+    setKorisnik(
+      data.korisnik
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      'Greška pri učitavanju profila:',
+      error
+    );
+
+    setKorisnik(null);
+
+  } finally {
+
+    setLoading(false);
+
   }
+}
 
 
   useFocusEffect(

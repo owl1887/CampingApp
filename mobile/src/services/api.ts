@@ -413,6 +413,35 @@ export async function registerUser(
   }
 }
 
+
+export async function getProfile(token: string) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/auth/profile`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    return await obradiResponse(response);
+
+  } catch (error) {
+
+    console.error(
+      'Greška getProfile:',
+      error
+    );
+
+    throw error;
+  }
+}
+
 export async function getReservationById(
   rezervacijaId: string,
   token: string
