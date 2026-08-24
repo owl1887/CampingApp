@@ -285,6 +285,16 @@ export default function AdminScreen() {
         </Text>
 
       </TouchableOpacity>
+      <TouchableOpacity
+  style={styles.addButton}
+  onPress={() =>
+    router.push('/admin/reservations')
+  }
+>
+  <Text style={styles.buttonText}>
+    📋 Upravljanje rezervacijama
+  </Text>
+</TouchableOpacity>
 
 
       <Text style={styles.sectionTitle}>

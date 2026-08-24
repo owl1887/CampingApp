@@ -608,3 +608,41 @@ export async function deleteCamp(
     throw error;
   }
 }
+export async function getAllReservations(
+  token: string
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/rezervacije/admin/sve`,
+      {
+        method: 'GET',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        'Greška pri učitavanju svih rezervacija.'
+      );
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error(
+      'Greška getAllReservations:',
+      error
+    );
+
+    throw error;
+  }
+}
