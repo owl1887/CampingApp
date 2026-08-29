@@ -105,7 +105,11 @@ export async function createReservation(
   kamp_id: number,
   datum_prijave: string,
   datum_odjave: string,
-  token: string
+  token: string,
+  odabranaOprema: {
+    oprema_id: number;
+    kolicina: number;
+  }[]
 ) {
   try {
     const response = await fetch(
@@ -122,11 +126,12 @@ export async function createReservation(
           kamp_id,
           datum_prijave,
           datum_odjave,
+          oprema: odabranaOprema,
         }),
       }
     );
 
-   return await obradiResponse(response);
+    return await obradiResponse(response);
 
   } catch (error) {
 
