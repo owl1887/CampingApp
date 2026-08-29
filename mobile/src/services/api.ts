@@ -1073,3 +1073,28 @@ export async function deleteEquipment(
     throw error;
   }
 }
+
+export async function getOpremaKampa(
+  kampId: number
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/oprema/kamp/${kampId}`
+    );
+
+    const podaci =
+      await obradiResponse(response);
+
+    return podaci.oprema || [];
+
+  } catch (error) {
+
+    console.error(
+      'Greška getOpremaKampa:',
+      error
+    );
+
+    throw error;
+  }
+}

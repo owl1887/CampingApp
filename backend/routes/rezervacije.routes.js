@@ -61,11 +61,9 @@ router.get('/', async (req, res) => {
 });
 
 
-// =====================================================
 // POST /api/rezervacije
-// Kreiranje rezervacije
-// Korisnik može izabrati i dodatnu opremu
-// =====================================================
+// Prijavljeni korisnik može napraviti rezervaciju
+// zajedno sa dodatnom opremom
 
 router.post(
     '/',
@@ -76,21 +74,19 @@ router.post(
 
         try {
 
-            const korisnik_id =
-                req.user.id;
-
+            const korisnik_id = req.user.id;
 
             const {
                 kamp_id,
                 datum_prijave,
                 datum_odjave,
-                oprema
+                oprema = []
             } = req.body;
 
 
-            // =====================================================
+            // ==========================================
             // 1. Provjera osnovnih podataka
-            // =====================================================
+            // ==========================================
 
             if (
                 !kamp_id ||
@@ -106,9 +102,9 @@ router.post(
             }
 
 
-            // =====================================================
+            // ==========================================
             // 2. Provjera datuma
-            // =====================================================
+            // ==========================================
 
             if (
                 datum_prijave >= datum_odjave
@@ -122,61 +118,25 @@ router.post(
             }
 
 
-            // =====================================================
-            // 3. Izračun broja noći / dana
-            // =====================================================
+            // ==========================================
+            // 3. Provjera da li kamp postoji
+            // ==========================================
 
-            const datum1 =
-                new Date(datum_prijave);
-
-            const datum2 =
-                new Date(datum_odjave);
-
-
-            const razlika =
-                datum2.getTime() -
-                datum1.getTime();
-
-
-            const broj_noci =
-                Math.ceil(
-                    razlika /
-                    (1000 * 60 * 60 * 24)
-                );
+            const kampResult = await client.query(
+                `
+                SELECT
+                    id,
+                    naziv,
+                    cijena_po_noci
+                FROM kamp_mjesta
+                WHERE id = $1
+                  AND aktivno = TRUE;
+                `,
+                [kamp_id]
+            );
 
 
-            if (broj_noci <= 0) {
-
-                return res.status(400).json({
-                    error:
-                        'Period rezervacije nije ispravan.'
-                });
-
-            }
-
-
-            // =====================================================
-            // 4. Provjera kampa
-            // =====================================================
-
-            const kampResult =
-                await pool.query(
-                    `
-                    SELECT
-                        id,
-                        naziv,
-                        cijena_po_noci
-                    FROM kamp_mjesta
-                    WHERE id = $1
-                      AND aktivno = TRUE;
-                    `,
-                    [kamp_id]
-                );
-
-
-            if (
-                kampResult.rows.length === 0
-            ) {
+            if (kampResult.rows.length === 0) {
 
                 return res.status(404).json({
                     error:
@@ -186,16 +146,15 @@ router.post(
             }
 
 
-            const kamp =
-                kampResult.rows[0];
+            const kamp = kampResult.rows[0];
 
 
-            // =====================================================
-            // 5. Provjera zauzetosti kampa
-            // =====================================================
+            // ==========================================
+            // 4. Provjera zauzetosti kampa
+            // ==========================================
 
             const zauzetaRezervacija =
-                await pool.query(
+                await client.query(
                     `
                     SELECT id
                     FROM rezervacije
@@ -224,76 +183,51 @@ router.post(
             }
 
 
-            // =====================================================
-            // 6. Početna cijena kampa
-            // =====================================================
+            // ==========================================
+            // 5. Provjera formata opreme
+            // ==========================================
 
-            const cijenaKampa =
-                broj_noci *
-                Number(kamp.cijena_po_noci);
+            if (!Array.isArray(oprema)) {
 
+                return res.status(400).json({
+                    error:
+                        'Podaci o opremi nisu ispravni.'
+                });
 
-            // =====================================================
-            // 7. Normalizacija opreme
-            // =====================================================
-
-            const odabranaOprema =
-                Array.isArray(oprema)
-                    ? oprema
-                    : [];
+            }
 
 
-            // =====================================================
-            // 8. Provjera opreme
-            // =====================================================
+            // ==========================================
+            // 6. Provjera opreme
+            // ==========================================
 
-            const opremaZaRezervaciju = [];
+            const opremaPodaci = [];
 
+            for (const stavka of oprema) {
 
-            for (
-                const stavka
-                of odabranaOprema
-            ) {
-
-                const opremaId =
+                const oprema_id =
                     Number(stavka.oprema_id);
 
-                const trazenaKolicina =
+                const kolicina =
                     Number(stavka.kolicina);
 
 
                 if (
-                    !Number.isInteger(opremaId) ||
-                    opremaId <= 0
+                    !Number.isInteger(oprema_id) ||
+                    !Number.isInteger(kolicina) ||
+                    kolicina <= 0
                 ) {
 
                     return res.status(400).json({
                         error:
-                            'Neispravan ID opreme.'
+                            'Podaci o odabranoj opremi nisu ispravni.'
                     });
 
                 }
 
-
-                if (
-                    !Number.isInteger(trazenaKolicina) ||
-                    trazenaKolicina <= 0
-                ) {
-
-                    return res.status(400).json({
-                        error:
-                            'Količina opreme mora biti veća od 0.'
-                    });
-
-                }
-
-
-                // =====================================================
-                // Dohvaćamo opremu
-                // =====================================================
 
                 const opremaResult =
-                    await pool.query(
+                    await client.query(
                         `
                         SELECT
                             id,
@@ -301,15 +235,14 @@ router.post(
                             naziv,
                             cijena,
                             jedinica,
-                            kolicina,
-                            aktivno
+                            kolicina AS dostupna_kolicina
                         FROM oprema
                         WHERE id = $1
                           AND kamp_id = $2
                           AND aktivno = TRUE;
                         `,
                         [
-                            opremaId,
+                            oprema_id,
                             kamp_id
                         ]
                     );
@@ -331,70 +264,20 @@ router.post(
                     opremaResult.rows[0];
 
 
-                // =====================================================
-                // Provjera trenutne dostupnosti opreme
-                // =====================================================
-
-                const zauzetaOpremaResult =
-                    await pool.query(
-                        `
-                        SELECT
-                            COALESCE(
-                                SUM(ro.kolicina),
-                                0
-                            ) AS zauzeta_kolicina
-
-                        FROM rezervacija_oprema ro
-
-                        INNER JOIN rezervacije r
-                            ON ro.rezervacija_id = r.id
-
-                        WHERE ro.oprema_id = $1
-
-                          AND r.status = 'aktivna'
-
-                          AND r.datum_prijave < $3
-
-                          AND r.datum_odjave > $2;
-                        `,
-                        [
-                            opremaId,
-                            datum_prijave,
-                            datum_odjave
-                        ]
-                    );
-
-
-                const zauzetaKolicina =
-                    Number(
-                        zauzetaOpremaResult.rows[0]
-                            .zauzeta_kolicina
-                    );
-
-
-                const dostupnaKolicina =
-                    Number(
-                        stavkaOpreme.kolicina
-                    ) -
-                    zauzetaKolicina;
-
+                // Provjera količine
 
                 if (
-                    trazenaKolicina >
-                    dostupnaKolicina
+                    kolicina >
+                    stavkaOpreme.dostupna_kolicina
                 ) {
 
                     return res.status(409).json({
                         error:
-                            `Oprema "${stavkaOpreme.naziv}" nije dostupna u traženoj količini. Dostupno: ${dostupnaKolicina}.`
+                            `Nije dostupna tražena količina opreme: ${stavkaOpreme.naziv}.`
                     });
 
                 }
 
-
-                // =====================================================
-                // Izračun cijene opreme
-                // =====================================================
 
                 const cijenaPoJedinici =
                     Number(
@@ -404,41 +287,61 @@ router.post(
 
                 const ukupnaCijenaOpreme =
                     cijenaPoJedinici *
-                    trazenaKolicina *
-                    broj_noci;
+                    kolicina;
 
 
-                opremaZaRezervaciju.push({
-
-                    oprema_id:
-                        opremaId,
-
+                opremaPodaci.push({
+                    oprema_id,
                     naziv:
                         stavkaOpreme.naziv,
-
-                    kolicina:
-                        trazenaKolicina,
-
+                    kolicina,
                     cijena_po_jedinici:
                         cijenaPoJedinici,
-
-                    broj_dana:
-                        broj_noci,
-
                     ukupna_cijena:
                         ukupnaCijenaOpreme
-
                 });
 
             }
 
 
-            // =====================================================
-            // 9. Ukupna cijena rezervacije
-            // =====================================================
+            // ==========================================
+            // 7. Izračun broja noći
+            // ==========================================
+
+            const datum1 =
+                new Date(datum_prijave);
+
+            const datum2 =
+                new Date(datum_odjave);
+
+
+            const razlika =
+                datum2.getTime() -
+                datum1.getTime();
+
+
+            const broj_noci =
+                Math.ceil(
+                    razlika /
+                    (1000 * 60 * 60 * 24)
+                );
+
+
+            // ==========================================
+            // 8. Cijena kampa
+            // ==========================================
+
+            const cijenaKampa =
+                broj_noci *
+                Number(kamp.cijena_po_noci);
+
+
+            // ==========================================
+            // 9. Cijena opreme
+            // ==========================================
 
             const cijenaOpreme =
-                opremaZaRezervaciju.reduce(
+                opremaPodaci.reduce(
                     (
                         ukupno,
                         stavka
@@ -449,25 +352,27 @@ router.post(
                 );
 
 
+            // ==========================================
+            // 10. Konačna cijena
+            // ==========================================
+
             const ukupna_cijena =
                 cijenaKampa +
                 cijenaOpreme;
 
 
-            // =====================================================
-            // 10. Pokretanje transakcije
-            // =====================================================
+            // ==========================================
+            // 11. TRANSAKCIJA
+            // ==========================================
 
-            await client.query(
-                'BEGIN'
-            );
+            await client.query('BEGIN');
 
 
-            // =====================================================
-            // 11. Kreiranje rezervacije
-            // =====================================================
+            // ==========================================
+            // 12. Kreiranje rezervacije
+            // ==========================================
 
-            const result =
+            const rezervacijaResult =
                 await client.query(
                     `
                     INSERT INTO rezervacije
@@ -501,16 +406,16 @@ router.post(
 
 
             const rezervacija =
-                result.rows[0];
+                rezervacijaResult.rows[0];
 
 
-            // =====================================================
-            // 12. Spremanje odabrane opreme
-            // =====================================================
+            // ==========================================
+            // 13. Dodavanje opreme rezervaciji
+            // ==========================================
 
             for (
                 const stavka
-                of opremaZaRezervaciju
+                of opremaPodaci
             ) {
 
                 await client.query(
@@ -521,7 +426,6 @@ router.post(
                         oprema_id,
                         kolicina,
                         cijena_po_jedinici,
-                        broj_dana,
                         ukupna_cijena
                     )
                     VALUES
@@ -530,8 +434,7 @@ router.post(
                         $2,
                         $3,
                         $4,
-                        $5,
-                        $6
+                        $5
                     );
                     `,
                     [
@@ -539,7 +442,6 @@ router.post(
                         stavka.oprema_id,
                         stavka.kolicina,
                         stavka.cijena_po_jedinici,
-                        stavka.broj_dana,
                         stavka.ukupna_cijena
                     ]
                 );
@@ -547,18 +449,16 @@ router.post(
             }
 
 
-            // =====================================================
-            // 13. Završetak transakcije
-            // =====================================================
+            // ==========================================
+            // 14. Potvrda transakcije
+            // ==========================================
 
-            await client.query(
-                'COMMIT'
-            );
+            await client.query('COMMIT');
 
 
-            // =====================================================
-            // 14. Odgovor
-            // =====================================================
+            // ==========================================
+            // 15. Odgovor
+            // ==========================================
 
             res.status(201).json({
 
@@ -583,27 +483,14 @@ router.post(
                 ukupna_cijena,
 
                 oprema:
-                    opremaZaRezervaciju
+                    opremaPodaci
 
             });
 
 
         } catch (error) {
 
-            try {
-
-                await client.query(
-                    'ROLLBACK'
-                );
-
-            } catch (rollbackError) {
-
-                console.error(
-                    'Greška pri rollback transakcije:',
-                    rollbackError
-                );
-
-            }
+            await client.query('ROLLBACK');
 
 
             console.error(
