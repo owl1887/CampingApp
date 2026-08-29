@@ -641,6 +641,7 @@ router.post(
 // =====================================================
 // GET /api/rezervacije/moje
 // Rezervacije trenutno prijavljenog korisnika
+// Uključuje i dodatnu opremu
 // =====================================================
 
 router.get(
@@ -667,11 +668,37 @@ router.get(
 
                         r.datum_prijave,
                         r.datum_odjave,
+
                         r.ukupna_cijena,
                         r.status,
 
                         k.latitude,
-                        k.longitude
+                        k.longitude,
+
+                        COALESCE(
+                            (
+                                SELECT json_agg(
+                                    json_build_object(
+                                        'id', ro.id,
+                                        'oprema_id', ro.oprema_id,
+                                        'naziv', o.naziv,
+                                        'opis', o.opis,
+                                        'kolicina', ro.kolicina,
+                                        'cijena_po_jedinici', ro.cijena_po_jedinici,
+                                        'broj_dana', ro.broj_dana,
+                                        'ukupna_cijena', ro.ukupna_cijena
+                                    )
+                                    ORDER BY o.naziv ASC
+                                )
+                                FROM rezervacija_oprema ro
+
+                                INNER JOIN oprema o
+                                    ON ro.oprema_id = o.id
+
+                                WHERE ro.rezervacija_id = r.id
+                            ),
+                            '[]'::json
+                        ) AS oprema
 
                     FROM rezervacije r
 

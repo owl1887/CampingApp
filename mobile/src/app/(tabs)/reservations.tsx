@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from 'react';
 
 import {
@@ -18,6 +17,7 @@ import {
 } from 'expo-router';
 
 import { getToken } from '@/services/auth';
+
 import {
   getMojeRezervacije,
   cancelReservation,
@@ -27,13 +27,19 @@ import {
 type Rezervacija = {
   id: string;
   kamp_id: string;
+
   kamp_naziv: string;
   kamp_opis: string;
+
   cijena_po_noci: string;
+
   datum_prijave: string;
   datum_odjave: string;
+
   ukupna_cijena: string;
+
   status: string;
+
   latitude: string;
   longitude: string;
 };
@@ -51,11 +57,16 @@ export default function ReservationsScreen() {
     useState(false);
 
 
+  // =====================================================
+  // UČITAVANJE REZERVACIJA
+  // =====================================================
+
   async function ucitajRezervacije() {
 
     try {
 
       const token = await getToken();
+
 
       if (!token) {
 
@@ -81,19 +92,26 @@ export default function ReservationsScreen() {
         error
       );
 
+
       Alert.alert(
         'Greška',
         error.message ||
         'Nije moguće učitati rezervacije.'
       );
 
+
     } finally {
 
       setLoading(false);
 
     }
+
   }
 
+
+  // =====================================================
+  // AUTOMATSKO UČITAVANJE KADA SE OTVORI EKRAN
+  // =====================================================
 
   useFocusEffect(
     useCallback(() => {
@@ -102,92 +120,117 @@ export default function ReservationsScreen() {
 
     }, [])
   );
-//funkcija za otkazivanje rervazijaaaaaaaa
 
+
+  // =====================================================
+  // OTPISIVANJE / OTKAZIVANJE REZERVACIJE
+  // =====================================================
 
   async function otkaziRezervaciju(
-  rezervacijaId: string
-) {
+    rezervacijaId: string
+  ) {
 
-  Alert.alert(
-    'Otkazivanje rezervacije',
-    'Da li ste sigurni da želite otkazati ovu rezervaciju?',
-    [
-      {
-        text: 'Ne',
-        style: 'cancel',
-      },
+    Alert.alert(
+      'Otkazivanje rezervacije',
+      'Da li ste sigurni da želite otkazati ovu rezervaciju?',
+      [
+        {
+          text: 'Ne',
+          style: 'cancel',
+        },
 
-      {
-        text: 'Da',
-        style: 'destructive',
+        {
+          text: 'Da',
+          style: 'destructive',
 
-        async onPress() {
+          async onPress() {
 
-          try {
+            try {
 
-            const token = await getToken();
+              const token =
+                await getToken();
 
-            if (!token) {
 
-              Alert.alert(
-                'Niste prijavljeni',
-                'Morate se prijaviti.'
+              if (!token) {
+
+                Alert.alert(
+                  'Niste prijavljeni',
+                  'Morate se prijaviti.'
+                );
+
+                return;
+              }
+
+
+              await cancelReservation(
+                rezervacijaId,
+                token
               );
 
-              return;
+
+              Alert.alert(
+                'Uspješno',
+                'Rezervacija je otkazana.'
+              );
+
+
+              await ucitajRezervacije();
+
+
+            } catch (error: any) {
+
+              console.error(
+                'Greška pri otkazivanju rezervacije:',
+                error
+              );
+
+
+              Alert.alert(
+                'Greška',
+                error.message ||
+                'Nije moguće otkazati rezervaciju.'
+              );
+
             }
 
-
-            await cancelReservation(
-              rezervacijaId,
-              token
-            );
-
-
-            Alert.alert(
-              'Uspješno',
-              'Rezervacija je otkazana.'
-            );
-
-
-            await ucitajRezervacije();
-
-
-          } catch (error: any) {
-
-            Alert.alert(
-              'Greška',
-              error.message ||
-              'Nije moguće otkazati rezervaciju.'
-            );
-
-          }
+          },
 
         },
-      },
-    ]
-  );
-}
 
-//osvjezi rezervacije
+      ]
+    );
+
+  }
+
+
+  // =====================================================
+  // OSVJEŽAVANJE REZERVACIJA
+  // =====================================================
 
   async function osvjeziRezervacije() {
 
     setRefreshing(true);
 
+
     await ucitajRezervacije();
+
 
     setRefreshing(false);
 
   }
 
 
+  // =====================================================
+  // FORMATIRANJE DATUMA
+  // =====================================================
+
   function formatirajDatum(
     datum: string
   ) {
 
-    const d = new Date(datum);
+    const d =
+      new Date(datum);
+
 
     return d.toLocaleDateString(
       'bs-BA',
@@ -197,8 +240,13 @@ export default function ReservationsScreen() {
         year: 'numeric',
       }
     );
+
   }
 
+
+  // =====================================================
+  // EKRAN UČITAVANJA
+  // =====================================================
 
   if (loading) {
 
@@ -206,7 +254,9 @@ export default function ReservationsScreen() {
 
       <View style={styles.center}>
 
-        <ActivityIndicator size="large" />
+        <ActivityIndicator
+          size="large"
+        />
 
         <Text style={styles.loadingText}>
           Učitavanje rezervacija...
@@ -218,6 +268,10 @@ export default function ReservationsScreen() {
 
   }
 
+
+  // =====================================================
+  // GLAVNI EKRAN
+  // =====================================================
 
   return (
 
@@ -259,10 +313,14 @@ export default function ReservationsScreen() {
                 style={styles.card}
               >
 
+                {/* NAZIV KAMPA */}
+
                 <Text style={styles.cardTitle}>
                   {rezervacija.kamp_naziv}
                 </Text>
 
+
+                {/* OPIS KAMPA */}
 
                 <Text style={styles.description}>
                   {rezervacija.kamp_opis}
@@ -272,6 +330,8 @@ export default function ReservationsScreen() {
                 <View style={styles.separator} />
 
 
+                {/* DATUM PRIJAVE */}
+
                 <Text style={styles.info}>
                   Prijava:{' '}
                   {formatirajDatum(
@@ -279,6 +339,8 @@ export default function ReservationsScreen() {
                   )}
                 </Text>
 
+
+                {/* DATUM ODJAVE */}
 
                 <Text style={styles.info}>
                   Odjava:{' '}
@@ -288,11 +350,15 @@ export default function ReservationsScreen() {
                 </Text>
 
 
+                {/* CIJENA PO NOĆI */}
+
                 <Text style={styles.info}>
                   Cijena po noći:{' '}
                   {rezervacija.cijena_po_noci} KM
                 </Text>
 
+
+                {/* UKUPNA CIJENA */}
 
                 <Text style={styles.total}>
                   Ukupna cijena:{' '}
@@ -300,44 +366,54 @@ export default function ReservationsScreen() {
                 </Text>
 
 
+                {/* STATUS */}
+
                 <Text style={styles.status}>
                   Status:{' '}
                   {rezervacija.status}
                 </Text>
 
-                  <TouchableOpacity
-  style={styles.detailsButton}
-  onPress={() =>
-    router.push(
-      `/reservation-details?id=${rezervacija.id}`
-    )
-  }
->
 
-  <Text style={styles.detailsButtonText}>
-    DETALJI
-  </Text>
+                {/* DUGME DETALJI */}
 
-</TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.detailsButton}
+
+                  onPress={() =>
+                    router.push(
+                      `/reservation-details?id=${rezervacija.id}`
+                    )
+                  }
+                >
+
+                  <Text style={styles.detailsButtonText}>
+                    DETALJI
+                  </Text>
+
+                </TouchableOpacity>
+
+
+                {/* DUGME OTKAZIVANJE */}
 
                 {rezervacija.status === 'aktivna' && (
 
-  <TouchableOpacity
-    style={styles.cancelButton}
-    onPress={() =>
-      otkaziRezervaciju(rezervacija.id)
-    }
-  >
+                  <TouchableOpacity
+                    style={styles.cancelButton}
 
-    <Text style={styles.cancelButtonText}>
-      OTKAŽI REZERVACIJU
-    </Text>
+                    onPress={() =>
+                      otkaziRezervaciju(
+                        rezervacija.id
+                      )
+                    }
+                  >
 
-  </TouchableOpacity>
+                    <Text style={styles.cancelButtonText}>
+                      OTKAŽI REZERVACIJU
+                    </Text>
 
-)}
+                  </TouchableOpacity>
 
-                
+                )}
 
               </View>
 
@@ -351,41 +427,21 @@ export default function ReservationsScreen() {
     </View>
 
   );
+
 }
 
 
+// =====================================================
+// STILOVI
+// =====================================================
+
 const styles = StyleSheet.create({
-
-  detailsButton: {
-  marginTop: 15,
-  padding: 12,
-  borderRadius: 8,
-  alignItems: 'center',
-  borderWidth: 1,
-},
-
-detailsButtonText: {
-  fontSize: 15,
-  fontWeight: 'bold',
-},
-
-  cancelButton: {
-  marginTop: 15,
-  padding: 12,
-  borderRadius: 8,
-  alignItems: 'center',
-  borderWidth: 1,
-},
-
-cancelButtonText: {
-  fontSize: 15,
-  fontWeight: 'bold',
-},
 
   container: {
     flex: 1,
     padding: 20,
   },
+
 
   center: {
     flex: 1,
@@ -393,10 +449,12 @@ cancelButtonText: {
     alignItems: 'center',
   },
 
+
   loadingText: {
     marginTop: 10,
     fontSize: 16,
   },
+
 
   title: {
     fontSize: 28,
@@ -404,9 +462,11 @@ cancelButtonText: {
     marginBottom: 20,
   },
 
+
   list: {
     flex: 1,
   },
+
 
   card: {
     borderWidth: 1,
@@ -415,11 +475,13 @@ cancelButtonText: {
     marginBottom: 15,
   },
 
+
   cardTitle: {
     fontSize: 21,
     fontWeight: 'bold',
     marginBottom: 8,
   },
+
 
   description: {
     fontSize: 14,
@@ -427,15 +489,18 @@ cancelButtonText: {
     marginBottom: 10,
   },
 
+
   separator: {
     borderBottomWidth: 1,
     marginVertical: 10,
   },
 
+
   info: {
     fontSize: 16,
     marginBottom: 7,
   },
+
 
   total: {
     fontSize: 17,
@@ -444,16 +509,49 @@ cancelButtonText: {
     marginBottom: 8,
   },
 
+
   status: {
     fontSize: 16,
     fontWeight: 'bold',
   },
+
+
+  detailsButton: {
+    marginTop: 15,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+
+
+  detailsButtonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
+
+  cancelButton: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+
+
+  cancelButtonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
 
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
 
   emptyText: {
     fontSize: 17,
