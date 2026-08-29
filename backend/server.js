@@ -17,7 +17,8 @@ const {
 
 const korisniciRoutes =
     require('./routes/korisnici.routes');
-
+const opremaRoutes =
+    require('./routes/oprema.routes');
 
 
 
@@ -70,6 +71,10 @@ app.use(
 app.use(
     '/api/korisnici',
     korisniciRoutes
+);
+app.use(
+    '/api/oprema',
+    opremaRoutes
 );
 
 

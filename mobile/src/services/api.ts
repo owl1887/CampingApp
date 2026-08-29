@@ -867,3 +867,204 @@ export async function deactivateUser(
   );
 
 }
+export async function getEquipmentByCamp(
+  kampId: number
+) {
+  try {
+
+    const response = await fetch(
+      `${API_URL}/oprema/kamp/${kampId}`
+    );
+
+    const text = await response.text();
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}: ${text}`
+      );
+
+    }
+
+    return JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      'Greška getEquipmentByCamp:',
+      error
+    );
+
+    throw error;
+  }
+}
+
+
+export async function addEquipment(
+  kampId: number,
+  naziv: string,
+  opis: string,
+  cijena: number,
+  jedinica: string,
+  kolicina: number,
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/oprema`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          kamp_id: kampId,
+          naziv,
+          opis,
+          cijena,
+          jedinica,
+          kolicina,
+        }),
+      }
+    );
+
+
+    const text =
+      await response.text();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}: ${text}`
+      );
+
+    }
+
+
+    return JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      'Greška addEquipment:',
+      error
+    );
+
+    throw error;
+  }
+}
+
+
+export async function updateEquipment(
+  opremaId: number,
+  naziv: string,
+  opis: string,
+  cijena: number,
+  jedinica: string,
+  kolicina: number,
+  aktivno: boolean,
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/oprema/${opremaId}`,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          naziv,
+          opis,
+          cijena,
+          jedinica,
+          kolicina,
+          aktivno,
+        }),
+      }
+    );
+
+
+    const text =
+      await response.text();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}: ${text}`
+      );
+
+    }
+
+
+    return JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      'Greška updateEquipment:',
+      error
+    );
+
+    throw error;
+  }
+}
+
+
+export async function deleteEquipment(
+  opremaId: number,
+  token: string
+) {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/oprema/${opremaId}`,
+      {
+        method: 'DELETE',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+
+    const text =
+      await response.text();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}: ${text}`
+      );
+
+    }
+
+
+    return JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      'Greška deleteEquipment:',
+      error
+    );
+
+    throw error;
+  }
+}

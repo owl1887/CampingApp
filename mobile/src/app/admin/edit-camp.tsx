@@ -26,6 +26,11 @@ type Karakteristike = {
   wifi: boolean;
   struja: boolean;
   parking: boolean;
+  rostilj: boolean;
+  vanjska_kuhinja: boolean;
+  kajak: boolean;
+  camac: boolean;
+  bicikl: boolean;
 };
 
 
@@ -48,6 +53,11 @@ export default function EditCampScreen() {
       wifi: false,
       struja: false,
       parking: false,
+      rostilj: false,
+      vanjska_kuhinja: false,
+      kajak: false,
+      camac: false,
+      bicikl: false,
     });
 
 
@@ -58,6 +68,7 @@ export default function EditCampScreen() {
   /*
    * Učitavanje postojećeg kampa
    */
+
   useEffect(() => {
 
     async function ucitajKamp() {
@@ -65,6 +76,7 @@ export default function EditCampScreen() {
       try {
 
         const kampId = Number(id);
+
 
         if (!kampId) {
 
@@ -79,11 +91,19 @@ export default function EditCampScreen() {
         }
 
 
-        const kamp = await getKampById(kampId);
+        const kamp =
+          await getKampById(kampId);
 
 
-        setNaziv(kamp.naziv || '');
-        setOpis(kamp.opis || '');
+        setNaziv(
+          kamp.naziv || ''
+        );
+
+
+        setOpis(
+          kamp.opis || ''
+        );
+
 
         setCijena(
           kamp.cijena_po_noci !== undefined &&
@@ -110,9 +130,31 @@ export default function EditCampScreen() {
 
 
         setKarakteristike({
-          wifi: kamp.karakteristike?.wifi === true,
-          struja: kamp.karakteristike?.struja === true,
-          parking: kamp.karakteristike?.parking === true,
+
+          wifi:
+            kamp.karakteristike?.wifi === true,
+
+          struja:
+            kamp.karakteristike?.struja === true,
+
+          parking:
+            kamp.karakteristike?.parking === true,
+
+          rostilj:
+            kamp.karakteristike?.rostilj === true,
+
+          vanjska_kuhinja:
+            kamp.karakteristike?.vanjska_kuhinja === true,
+
+          kajak:
+            kamp.karakteristike?.kajak === true,
+
+          camac:
+            kamp.karakteristike?.camac === true,
+
+          bicikl:
+            kamp.karakteristike?.bicikl === true,
+
         });
 
 
@@ -123,13 +165,16 @@ export default function EditCampScreen() {
           error
         );
 
+
         Alert.alert(
           'Greška',
           error.message ||
           'Nije moguće učitati podatke o kampu.'
         );
 
+
         router.back();
+
 
       } finally {
 
@@ -146,8 +191,9 @@ export default function EditCampScreen() {
 
 
   /*
-   * Promjena karakteristika
+   * Promjena karakteristike
    */
+
   function promijeniKarakteristiku(
     nazivKarakteristike: keyof Karakteristike,
     vrijednost: boolean
@@ -156,7 +202,8 @@ export default function EditCampScreen() {
     setKarakteristike(
       prethodne => ({
         ...prethodne,
-        [nazivKarakteristike]: vrijednost,
+        [nazivKarakteristike]:
+          vrijednost,
       })
     );
 
@@ -166,6 +213,7 @@ export default function EditCampScreen() {
   /*
    * Spremanje izmjena
    */
+
   async function sacuvajIzmjene() {
 
     if (!naziv.trim()) {
@@ -191,7 +239,9 @@ export default function EditCampScreen() {
 
 
     const cijenaBroj =
-      Number(cijena.replace(',', '.'));
+      Number(
+        cijena.replace(',', '.')
+      );
 
 
     if (
@@ -215,7 +265,10 @@ export default function EditCampScreen() {
     if (latitude.trim() !== '') {
 
       latitudeBroj =
-        Number(latitude.replace(',', '.'));
+        Number(
+          latitude.replace(',', '.')
+        );
+
 
       if (
         Number.isNaN(latitudeBroj) ||
@@ -237,7 +290,10 @@ export default function EditCampScreen() {
     if (longitude.trim() !== '') {
 
       longitudeBroj =
-        Number(longitude.replace(',', '.'));
+        Number(
+          longitude.replace(',', '.')
+        );
+
 
       if (
         Number.isNaN(longitudeBroj) ||
@@ -261,7 +317,8 @@ export default function EditCampScreen() {
       setSaving(true);
 
 
-      const token = await getToken();
+      const token =
+        await getToken();
 
 
       if (!token) {
@@ -270,6 +327,7 @@ export default function EditCampScreen() {
           'Niste prijavljeni',
           'Morate se prijaviti.'
         );
+
 
         router.replace('/login');
 
@@ -281,13 +339,20 @@ export default function EditCampScreen() {
         Number(id),
         {
           naziv: naziv.trim(),
+
           opis: opis.trim(),
-          cijena_po_noci: cijenaBroj,
+
+          cijena_po_noci:
+            cijenaBroj,
 
           karakteristike,
 
-          latitude: latitudeBroj,
-          longitude: longitudeBroj,
+          latitude:
+            latitudeBroj,
+
+          longitude:
+            longitudeBroj,
+
         },
         token
       );
@@ -299,9 +364,11 @@ export default function EditCampScreen() {
         [
           {
             text: 'OK',
+
             onPress: () => {
               router.replace('/admin');
             },
+
           },
         ]
       );
@@ -314,11 +381,13 @@ export default function EditCampScreen() {
         error
       );
 
+
       Alert.alert(
         'Greška',
         error.message ||
         'Nije moguće izmijeniti kamp.'
       );
+
 
     } finally {
 
@@ -332,6 +401,7 @@ export default function EditCampScreen() {
   /*
    * Loading ekran
    */
+
   if (loading) {
 
     return (
@@ -408,7 +478,7 @@ export default function EditCampScreen() {
 
 
       <Text style={styles.sectionTitle}>
-        Karakteristike
+        Osnovne karakteristike
       </Text>
 
 
@@ -461,6 +531,113 @@ export default function EditCampScreen() {
           onValueChange={(vrijednost) =>
             promijeniKarakteristiku(
               'parking',
+              vrijednost
+            )
+          }
+        />
+
+      </View>
+
+
+      <Text style={styles.sectionTitle}>
+        Dodatne pogodnosti
+      </Text>
+
+
+      <View style={styles.switchRow}>
+
+        <Text style={styles.switchText}>
+          Roštilj
+        </Text>
+
+        <Switch
+          value={karakteristike.rostilj}
+          onValueChange={(vrijednost) =>
+            promijeniKarakteristiku(
+              'rostilj',
+              vrijednost
+            )
+          }
+        />
+
+      </View>
+
+
+      <View style={styles.switchRow}>
+
+        <Text style={styles.switchText}>
+          Vanjska kuhinja
+        </Text>
+
+        <Switch
+          value={
+            karakteristike.vanjska_kuhinja
+          }
+          onValueChange={(vrijednost) =>
+            promijeniKarakteristiku(
+              'vanjska_kuhinja',
+              vrijednost
+            )
+          }
+        />
+
+      </View>
+
+
+      <Text style={styles.sectionTitle}>
+        Oprema za iznajmljivanje
+      </Text>
+
+
+      <View style={styles.switchRow}>
+
+        <Text style={styles.switchText}>
+          Kajak
+        </Text>
+
+        <Switch
+          value={karakteristike.kajak}
+          onValueChange={(vrijednost) =>
+            promijeniKarakteristiku(
+              'kajak',
+              vrijednost
+            )
+          }
+        />
+
+      </View>
+
+
+      <View style={styles.switchRow}>
+
+        <Text style={styles.switchText}>
+          Čamac
+        </Text>
+
+        <Switch
+          value={karakteristike.camac}
+          onValueChange={(vrijednost) =>
+            promijeniKarakteristiku(
+              'camac',
+              vrijednost
+            )
+          }
+        />
+
+      </View>
+
+
+      <View style={styles.switchRow}>
+
+        <Text style={styles.switchText}>
+          Bicikl
+        </Text>
+
+        <Switch
+          value={karakteristike.bicikl}
+          onValueChange={(vrijednost) =>
+            promijeniKarakteristiku(
+              'bicikl',
               vrijednost
             )
           }
@@ -541,10 +718,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+
   content: {
     padding: 20,
     paddingBottom: 40,
   },
+
 
   center: {
     flex: 1,
@@ -553,16 +732,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
+
   loadingText: {
     marginTop: 10,
     fontSize: 16,
   },
+
 
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 30,
   },
+
 
   label: {
     fontSize: 16,
@@ -571,6 +753,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
 
+
   input: {
     borderWidth: 1,
     borderRadius: 10,
@@ -578,10 +761,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+
   textArea: {
     minHeight: 120,
     textAlignVertical: 'top',
   },
+
 
   sectionTitle: {
     fontSize: 21,
@@ -590,6 +775,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+
   switchRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -597,9 +783,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
 
+
   switchText: {
     fontSize: 17,
   },
+
 
   saveButton: {
     marginTop: 30,
@@ -609,10 +797,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
 
+
   saveButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
   },
+
 
   cancelButton: {
     marginTop: 12,
@@ -620,6 +810,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
+
 
   cancelButtonText: {
     fontSize: 16,

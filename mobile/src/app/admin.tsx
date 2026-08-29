@@ -347,6 +347,7 @@ export default function AdminScreen() {
 
           <View style={styles.actions}>
 
+          
             <TouchableOpacity
               style={styles.editButton}
              onPress={() =>
@@ -388,6 +389,15 @@ export default function AdminScreen() {
 
 
 const styles = StyleSheet.create({
+
+equipmentButton: {
+  flex: 1,
+  padding: 12,
+  borderWidth: 1,
+  borderRadius: 8,
+  alignItems: 'center',
+},
+
     deleteButton: {
   marginTop: 10,
   padding: 12,
