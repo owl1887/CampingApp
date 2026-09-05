@@ -25,6 +25,8 @@ const opremaRoutes =
 const app = express();
 app.use(cors());
 
+app.use('/images', express.static('images'));
+
 const PORT = 3000;
 
 app.use(express.json());

@@ -22,7 +22,8 @@ router.get('/', async (req, res) => {
                 cijena_po_noci,
                 karakteristike,
                 latitude,
-                longitude
+                longitude,
+                slika_url
             FROM kamp_mjesta
             WHERE aktivno = TRUE
             ORDER BY naziv ASC;
@@ -54,7 +55,8 @@ router.get('/:id', async (req, res) => {
                 cijena_po_noci,
                 karakteristike,
                 latitude,
-                longitude
+                longitude,
+                slika_url
             FROM kamp_mjesta
             WHERE id = $1
               AND aktivno = TRUE;
