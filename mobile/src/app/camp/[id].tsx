@@ -13,7 +13,10 @@ Marker,
 } from '@maplibre/maplibre-react-native';
 
 import {
-getKampById, addToWishlist, IMAGE_URL,
+  getKampById,
+  getOpremaKampa,
+  addToWishlist,
+  IMAGE_URL,
 } from '@/services/api';
 
 import { getToken } from '@/services/auth';
@@ -50,6 +53,16 @@ latitude?: number;
 longitude?: number;
 slika_url?: string;
 };
+type Oprema = {
+  id: number;
+  kamp_id: number;
+  naziv: string;
+  opis: string;
+  cijena: number;
+  jedinica: string;
+  kolicina: number;
+  aktivno: boolean;
+};
 
 export default function CampDetailsScreen() {
 
@@ -68,6 +81,9 @@ useState('');
 
 const [dodavanjeWishlist, setDodavanjeWishlist] =
 useState(false);
+
+const [oprema, setOprema] =
+useState<Oprema[]>([]);
 
 useEffect(() => {
 
@@ -90,10 +106,15 @@ async function ucitajKamp() {
 
 
     const podaci =
-      await getKampById(kampId);
+  await getKampById(kampId);
+
+setKamp(podaci);
 
 
-    setKamp(podaci);
+const opremaKampa =
+  await getOpremaKampa(kampId);
+
+setOprema(opremaKampa);
 
 
   } catch (error) {
@@ -394,78 +415,68 @@ return (
 
 
     {/* ========================================= */}
-    {/* OPREMA */}
-    {/* ========================================= */}
+{/* OPREMA */}
+{/* ========================================= */}
 
-    {(kamp.karakteristike?.kajak ||
-      kamp.karakteristike?.camac ||
-      kamp.karakteristike?.bicikl) && (
+{oprema.length > 0 && (
 
-      <>
+  <>
 
-        <Text style={styles.sectionTitle}>
-          Oprema za iznajmljivanje
-        </Text>
+    <Text style={styles.sectionTitle}>
+      Oprema za iznajmljivanje
+    </Text>
 
+    <View style={styles.equipmentContainer}>
 
-        <View style={styles.equipmentContainer}>
+      {oprema.map((stavka) => (
 
+        <View
+          key={stavka.id}
+          style={styles.equipmentItem}
+        >
 
-          {kamp.karakteristike?.kajak && (
+          <View style={styles.equipmentHeader}>
 
-            <View style={styles.equipmentItem}>
+            <Text style={styles.equipmentIcon}>
+              {stavka.naziv === 'Kajak'
+                ? '🛶'
+                : stavka.naziv === 'Čamac'
+                ? '🚣'
+                : stavka.naziv === 'Bicikl'
+                ? '🚲'
+                : '🏕️'}
+            </Text>
 
-              <Text style={styles.equipmentIcon}>
-                🛶
-              </Text>
+            <Text style={styles.equipmentText}>
+              {stavka.naziv}
+            </Text>
 
-              <Text style={styles.equipmentText}>
-                Kajak
-              </Text>
-
-            </View>
-
-          )}
-
-
-          {kamp.karakteristike?.camac && (
-
-            <View style={styles.equipmentItem}>
-
-              <Text style={styles.equipmentIcon}>
-                🚣
-              </Text>
-
-              <Text style={styles.equipmentText}>
-                Čamac
-              </Text>
-
-            </View>
-
-          )}
+          </View>
 
 
-          {kamp.karakteristike?.bicikl && (
+          <Text style={styles.equipmentDescription}>
+            {stavka.opis}
+          </Text>
 
-            <View style={styles.equipmentItem}>
 
-              <Text style={styles.equipmentIcon}>
-                🚲
-              </Text>
+          <Text style={styles.equipmentPrice}>
+            {Number(stavka.cijena).toFixed(2)} KM / {stavka.jedinica}
+          </Text>
 
-              <Text style={styles.equipmentText}>
-                Bicikl
-              </Text>
 
-            </View>
-
-          )}
+          <Text style={styles.equipmentQuantity}>
+            Dostupno: {stavka.kolicina}
+          </Text>
 
         </View>
 
-      </>
+      ))}
 
-    )}
+    </View>
+
+  </>
+
+)}
 
 
     {/* ========================================= */}
@@ -577,6 +588,34 @@ return (
 
 const styles = StyleSheet.create({
 
+  equipmentItem: {
+  borderWidth: 1,
+  borderRadius: 10,
+  padding: 15,
+  marginBottom: 10,
+},
+
+equipmentHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+
+equipmentDescription: {
+  fontSize: 14,
+  marginBottom: 8,
+},
+
+equipmentPrice: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginBottom: 5,
+},
+
+equipmentQuantity: {
+  fontSize: 14,
+},
+
 campImage: { width: '100%', height: 250, },
   imagePlaceholder: { height: 250, justifyContent: 'center', alignItems: 'center', },
 
@@ -652,13 +691,7 @@ equipmentContainer: {
 gap: 10,
 },
 
-equipmentItem: {
-flexDirection: 'row',
-alignItems: 'center',
-borderWidth: 1,
-borderRadius: 10,
-padding: 12,
-},
+
 
 equipmentIcon: {
 fontSize: 25,
