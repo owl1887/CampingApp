@@ -16,6 +16,8 @@ import {
   useFocusEffect,
 } from 'expo-router';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { getToken } from '@/services/auth';
 
 import {
@@ -45,6 +47,7 @@ type Rezervacija = {
   oprema: RezervacijaOprema[];
 };
 
+
 type RezervacijaOprema = {
   id: string;
   oprema_id: string;
@@ -55,6 +58,7 @@ type RezervacijaOprema = {
   broj_dana: number;
   ukupna_cijena: string;
 };
+
 
 export default function ReservationsScreen() {
 
@@ -134,7 +138,7 @@ export default function ReservationsScreen() {
 
 
   // =====================================================
-  // OTPISIVANJE / OTKAZIVANJE REZERVACIJE
+  // OTKAZIVANJE REZERVACIJE
   // =====================================================
 
   async function otkaziRezervaciju(
@@ -222,9 +226,7 @@ export default function ReservationsScreen() {
 
     setRefreshing(true);
 
-
     await ucitajRezervacije();
-
 
     setRefreshing(false);
 
@@ -256,6 +258,52 @@ export default function ReservationsScreen() {
 
 
   // =====================================================
+  // STATUS REZERVACIJE
+  // =====================================================
+
+  function statusTekst(status: string) {
+
+    switch (status) {
+
+      case 'aktivna':
+        return 'Aktivna';
+
+      case 'otkazana':
+        return 'Otkazana';
+
+      case 'zavrsena':
+        return 'Završena';
+
+      default:
+        return status;
+
+    }
+
+  }
+
+
+  function statusIkona(status: string) {
+
+    switch (status) {
+
+      case 'aktivna':
+        return 'checkmark-circle-outline';
+
+      case 'otkazana':
+        return 'close-circle-outline';
+
+      case 'zavrsena':
+        return 'checkmark-done-circle-outline';
+
+      default:
+        return 'help-circle-outline';
+
+    }
+
+  }
+
+
+  // =====================================================
   // EKRAN UČITAVANJA
   // =====================================================
 
@@ -267,6 +315,7 @@ export default function ReservationsScreen() {
 
         <ActivityIndicator
           size="large"
+          color="#81C784"
         />
 
         <Text style={styles.loadingText}>
@@ -288,17 +337,57 @@ export default function ReservationsScreen() {
 
     <View style={styles.container}>
 
-      <Text style={styles.title}>
-        Moje rezervacije
-      </Text>
+      {/* NASLOV */}
+
+      <View style={styles.header}>
+
+        <View style={styles.headerIconContainer}>
+
+          <Ionicons
+            name="calendar-outline"
+            size={26}
+            color="#81C784"
+          />
+
+        </View>
+
+        <View>
+
+          <Text style={styles.title}>
+            Moje rezervacije
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Pregled vaših rezervacija
+          </Text>
+
+        </View>
+
+      </View>
 
 
       {rezervacije.length === 0 ? (
 
+        /* PRAZNO STANJE */
+
         <View style={styles.emptyContainer}>
 
+          <View style={styles.emptyIconContainer}>
+
+            <Ionicons
+              name="calendar-outline"
+              size={48}
+              color="#81C784"
+            />
+
+          </View>
+
+          <Text style={styles.emptyTitle}>
+            Nemate rezervacija
+          </Text>
+
           <Text style={styles.emptyText}>
-            Trenutno nemate rezervacija.
+            Trenutno nemate nijednu aktivnu ili prethodnu rezervaciju.
           </Text>
 
         </View>
@@ -307,11 +396,15 @@ export default function ReservationsScreen() {
 
         <ScrollView
           style={styles.list}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
 
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={osvjeziRezervacije}
+              tintColor="#81C784"
+              colors={['#81C784']}
             />
           }
         >
@@ -326,9 +419,31 @@ export default function ReservationsScreen() {
 
                 {/* NAZIV KAMPA */}
 
-                <Text style={styles.cardTitle}>
-                  {rezervacija.kamp_naziv}
-                </Text>
+                <View style={styles.cardHeader}>
+
+                  <View style={styles.campIconContainer}>
+
+                    <Ionicons
+                      name="bonfire-outline"
+                      size={24}
+                      color="#81C784"
+                    />
+
+                  </View>
+
+                  <View style={styles.cardTitleContainer}>
+
+                    <Text style={styles.cardTitle}>
+                      {rezervacija.kamp_naziv}
+                    </Text>
+
+                    <Text style={styles.reservationNumber}>
+                      Rezervacija #{rezervacija.id}
+                    </Text>
+
+                  </View>
+
+                </View>
 
 
                 {/* OPIS KAMPA */}
@@ -341,92 +456,215 @@ export default function ReservationsScreen() {
                 <View style={styles.separator} />
 
 
-                {/* DATUM PRIJAVE */}
+                {/* DATUMI */}
 
-                <Text style={styles.info}>
-                  Prijava:{' '}
-                  {formatirajDatum(
-                    rezervacija.datum_prijave
-                  )}
-                </Text>
+                <View style={styles.infoRow}>
+
+                  <View style={styles.infoIconContainer}>
+
+                    <Ionicons
+                      name="log-in-outline"
+                      size={20}
+                      color="#81C784"
+                    />
+
+                  </View>
+
+                  <View style={styles.infoTextContainer}>
+
+                    <Text style={styles.infoLabel}>
+                      Prijava
+                    </Text>
+
+                    <Text style={styles.infoValue}>
+                      {formatirajDatum(
+                        rezervacija.datum_prijave
+                      )}
+                    </Text>
+
+                  </View>
+
+                </View>
 
 
-                {/* DATUM ODJAVE */}
+                <View style={styles.infoRow}>
 
-                <Text style={styles.info}>
-                  Odjava:{' '}
-                  {formatirajDatum(
-                    rezervacija.datum_odjave
-                  )}
-                </Text>
+                  <View style={styles.infoIconContainer}>
+
+                    <Ionicons
+                      name="log-out-outline"
+                      size={20}
+                      color="#81C784"
+                    />
+
+                  </View>
+
+                  <View style={styles.infoTextContainer}>
+
+                    <Text style={styles.infoLabel}>
+                      Odjava
+                    </Text>
+
+                    <Text style={styles.infoValue}>
+                      {formatirajDatum(
+                        rezervacija.datum_odjave
+                      )}
+                    </Text>
+
+                  </View>
+
+                </View>
 
 
-                {/* CIJENA PO NOĆI */}
+                {/* CIJENA */}
 
-                <Text style={styles.info}>
-                  Cijena po noći:{' '}
-                  {rezervacija.cijena_po_noci} KM
-                </Text>
+                <View style={styles.infoRow}>
+
+                  <View style={styles.infoIconContainer}>
+
+                    <Ionicons
+                      name="pricetag-outline"
+                      size={20}
+                      color="#81C784"
+                    />
+
+                  </View>
+
+                  <View style={styles.infoTextContainer}>
+
+                    <Text style={styles.infoLabel}>
+                      Cijena po noći
+                    </Text>
+
+                    <Text style={styles.infoValue}>
+                      {rezervacija.cijena_po_noci} KM
+                    </Text>
+
+                  </View>
+
+                </View>
+
+
+                {/* DODATNA OPREMA */}
+
+                {rezervacija.oprema &&
+                  rezervacija.oprema.length > 0 && (
+
+                  <View style={styles.equipmentSection}>
+
+                    <View style={styles.equipmentHeader}>
+
+                      <Ionicons
+                        name="construct-outline"
+                        size={20}
+                        color="#81C784"
+                      />
+
+                      <Text style={styles.equipmentTitle}>
+                        Dodatna oprema
+                      </Text>
+
+                    </View>
+
+
+                    {rezervacija.oprema.map(
+                      (stavka) => (
+
+                        <View
+                          key={stavka.id}
+                          style={styles.equipmentItem}
+                        >
+
+                          <View style={styles.equipmentTopRow}>
+
+                            <Text style={styles.equipmentName}>
+                              {stavka.naziv}
+                            </Text>
+
+                            <Text style={styles.equipmentQuantity}>
+                              × {stavka.kolicina}
+                            </Text>
+
+                          </View>
+
+
+                          <Text style={styles.equipmentDetails}>
+                            {Number(
+                              stavka.cijena_po_jedinici
+                            ).toFixed(2)} KM × {stavka.kolicina} × {stavka.broj_dana} dana
+                          </Text>
+
+
+                          <Text style={styles.equipmentTotal}>
+                            {Number(
+                              stavka.ukupna_cijena
+                            ).toFixed(2)} KM
+                          </Text>
+
+                        </View>
+
+                      )
+                    )}
+
+                  </View>
+
+                )}
 
 
                 {/* UKUPNA CIJENA */}
 
-                <Text style={styles.total}>
-                  Ukupna cijena:{' '}
-                  {rezervacija.ukupna_cijena} KM
-                </Text>
+                <View style={styles.totalContainer}>
 
-                {/* DODATNA OPREMA */}
+                  <Text style={styles.totalLabel}>
+                    Ukupna cijena
+                  </Text>
 
-{rezervacija.oprema &&
-  rezervacija.oprema.length > 0 && (
+                  <Text style={styles.total}>
+                    {rezervacija.ukupna_cijena} KM
+                  </Text>
 
-    <View style={styles.equipmentSection}>
-
-      <Text style={styles.equipmentTitle}>
-        Dodatna oprema
-      </Text>
-
-      {rezervacija.oprema.map(
-        (stavka) => (
-
-          <View
-            key={stavka.id}
-            style={styles.equipmentItem}
-          >
-
-            <Text style={styles.equipmentName}>
-              {stavka.naziv} × {stavka.kolicina}
-            </Text>
-
-            <Text style={styles.equipmentDetails}>
-              {Number(
-                stavka.cijena_po_jedinici
-              ).toFixed(2)} KM × {stavka.kolicina} × {stavka.broj_dana} dana
-            </Text>
-
-            <Text style={styles.equipmentTotal}>
-              {Number(
-                stavka.ukupna_cijena
-              ).toFixed(2)} KM
-            </Text>
-
-          </View>
-
-        )
-      )}
-
-    </View>
-
-  )}
+                </View>
 
 
                 {/* STATUS */}
 
-                <Text style={styles.status}>
-                  Status:{' '}
-                  {rezervacija.status}
-                </Text>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    rezervacija.status === 'aktivna'
+                      ? styles.statusActive
+                      : rezervacija.status === 'otkazana'
+                        ? styles.statusCancelled
+                        : styles.statusFinished,
+                  ]}
+                >
+
+                  <Ionicons
+                    name={statusIkona(rezervacija.status) as any}
+                    size={18}
+                    color={
+                      rezervacija.status === 'aktivna'
+                        ? '#81C784'
+                        : rezervacija.status === 'otkazana'
+                          ? '#EF5350'
+                          : '#BDBDBD'
+                    }
+                  />
+
+                  <Text
+                    style={[
+                      styles.statusText,
+                      rezervacija.status === 'aktivna'
+                        ? styles.statusTextActive
+                        : rezervacija.status === 'otkazana'
+                          ? styles.statusTextCancelled
+                          : styles.statusTextFinished,
+                    ]}
+                  >
+                    {statusTekst(rezervacija.status)}
+                  </Text>
+
+                </View>
 
 
                 {/* DUGME DETALJI */}
@@ -440,6 +678,12 @@ export default function ReservationsScreen() {
                     )
                   }
                 >
+
+                  <Ionicons
+                    name="eye-outline"
+                    size={19}
+                    color="#FFFFFF"
+                  />
 
                   <Text style={styles.detailsButtonText}>
                     DETALJI
@@ -461,6 +705,12 @@ export default function ReservationsScreen() {
                       )
                     }
                   >
+
+                    <Ionicons
+                      name="close-circle-outline"
+                      size={19}
+                      color="#EF5350"
+                    />
 
                     <Text style={styles.cancelButtonText}>
                       OTKAŽI REZERVACIJU
@@ -491,158 +741,436 @@ export default function ReservationsScreen() {
 // =====================================================
 
 const styles = StyleSheet.create({
-  equipmentSection: {
-  marginTop: 12,
-  marginBottom: 8,
-},
-
-equipmentTitle: {
-  fontSize: 17,
-  fontWeight: 'bold',
-  marginBottom: 8,
-},
-
-equipmentItem: {
-  borderWidth: 1,
-  borderRadius: 8,
-  padding: 10,
-  marginBottom: 7,
-},
-
-equipmentName: {
-  fontSize: 16,
-  fontWeight: 'bold',
-  marginBottom: 4,
-},
-
-equipmentDetails: {
-  fontSize: 13,
-  marginBottom: 3,
-},
-
-equipmentTotal: {
-  fontSize: 14,
-  fontWeight: 'bold',
-},
 
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#121212',
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
 
+
+  // =====================================================
+  // HEADER
+  // =====================================================
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+
+  headerIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+
+  title: {
+    fontSize: 27,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+
+
+  subtitle: {
+    fontSize: 14,
+    color: '#9E9E9E',
+    marginTop: 2,
+  },
+
+
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#121212',
   },
 
 
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    color: '#BDBDBD',
   },
 
 
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-
+  // =====================================================
+  // LISTA
+  // =====================================================
 
   list: {
     flex: 1,
   },
 
 
+  listContent: {
+    paddingBottom: 25,
+  },
+
+
+  // =====================================================
+  // KARTICA
+  // =====================================================
+
   card: {
+    backgroundColor: '#1E1E1E',
     borderWidth: 1,
-    borderRadius: 12,
+    borderColor: '#2C2C2C',
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 15,
+    marginBottom: 16,
+  },
+
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+
+  campIconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+
+  cardTitleContainer: {
+    flex: 1,
   },
 
 
   cardTitle: {
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#FFFFFF',
+  },
+
+
+  reservationNumber: {
+    fontSize: 12,
+    color: '#757575',
+    marginTop: 3,
   },
 
 
   description: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 10,
+    color: '#BDBDBD',
+    marginBottom: 5,
   },
 
 
   separator: {
-    borderBottomWidth: 1,
-    marginVertical: 10,
+    height: 1,
+    backgroundColor: '#2C2C2C',
+    marginVertical: 14,
   },
 
 
-  info: {
+  // =====================================================
+  // INFORMACIJE
+  // =====================================================
+
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+
+  infoIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+
+
+  infoTextContainer: {
+    flex: 1,
+  },
+
+
+  infoLabel: {
+    fontSize: 12,
+    color: '#9E9E9E',
+    marginBottom: 2,
+  },
+
+
+  infoValue: {
+    fontSize: 15,
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+
+
+  // =====================================================
+  // DODATNA OPREMA
+  // =====================================================
+
+  equipmentSection: {
+    marginTop: 8,
+    marginBottom: 12,
+  },
+
+
+  equipmentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+
+  equipmentTitle: {
     fontSize: 16,
-    marginBottom: 7,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginLeft: 8,
   },
 
 
-  total: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginTop: 5,
+  equipmentItem: {
+    backgroundColor: '#181818',
+    borderWidth: 1,
+    borderColor: '#2C2C2C',
+    borderRadius: 10,
+    padding: 11,
     marginBottom: 8,
   },
 
 
-  status: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  equipmentTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
 
-  detailsButton: {
-    marginTop: 15,
-    padding: 12,
-    borderRadius: 8,
+  equipmentName: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+
+
+  equipmentQuantity: {
+    fontSize: 14,
+    color: '#81C784',
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+
+
+  equipmentDetails: {
+    fontSize: 12,
+    color: '#9E9E9E',
+    marginTop: 5,
+  },
+
+
+  equipmentTotal: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#81C784',
+    marginTop: 5,
+  },
+
+
+  // =====================================================
+  // UKUPNA CIJENA
+  // =====================================================
+
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#2C2C2C',
+    paddingTop: 13,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+
+
+  totalLabel: {
+    fontSize: 15,
+    color: '#BDBDBD',
+  },
+
+
+  total: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#81C784',
+  },
+
+
+  // =====================================================
+  // STATUS
+  // =====================================================
+
+  statusBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: 20,
+    marginBottom: 13,
+  },
+
+
+  statusActive: {
+    backgroundColor: '#1B3320',
     borderWidth: 1,
+    borderColor: '#2E7D32',
+  },
+
+
+  statusCancelled: {
+    backgroundColor: '#351B1B',
+    borderWidth: 1,
+    borderColor: '#5A2929',
+  },
+
+
+  statusFinished: {
+    backgroundColor: '#292929',
+    borderWidth: 1,
+    borderColor: '#3A3A3A',
+  },
+
+
+  statusText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginLeft: 6,
+  },
+
+
+  statusTextActive: {
+    color: '#81C784',
+  },
+
+
+  statusTextCancelled: {
+    color: '#EF5350',
+  },
+
+
+  statusTextFinished: {
+    color: '#BDBDBD',
+  },
+
+
+  // =====================================================
+  // DUGME DETALJI
+  // =====================================================
+
+  detailsButton: {
+    backgroundColor: '#2E7D32',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: 2,
   },
 
 
   detailsButtonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginLeft: 7,
   },
 
 
+  // =====================================================
+  // DUGME OTKAZIVANJE
+  // =====================================================
+
   cancelButton: {
-    marginTop: 10,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
     borderWidth: 1,
+    borderColor: '#5A2929',
+    paddingVertical: 11,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: 9,
   },
 
 
   cancelButtonText: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: 'bold',
+    color: '#EF5350',
+    marginLeft: 7,
   },
 
+
+  // =====================================================
+  // PRAZNO STANJE
+  // =====================================================
 
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingBottom: 60,
+  },
+
+
+  emptyIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+
+
+  emptyTitle: {
+    fontSize: 21,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
 
 
   emptyText: {
-    fontSize: 17,
+    fontSize: 15,
+    color: '#9E9E9E',
+    textAlign: 'center',
+    lineHeight: 21,
   },
 
 });

@@ -13,13 +13,28 @@ export default function TabLayout() {
 
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#208AEF',
-          tabBarInactiveTintColor: '#777',
+          headerShown: false,
+
+          tabBarActiveTintColor: '#81C784',
+          tabBarInactiveTintColor: '#757575',
+
+          tabBarStyle: {
+            backgroundColor: '#1E1E1E',
+            borderTopColor: '#2C2C2C',
+            borderTopWidth: 1,
+            height: 65,
+            paddingBottom: 7,
+            paddingTop: 5,
+          },
+
           tabBarLabelStyle: {
             fontSize: 11,
+            fontWeight: '500',
           },
         }}
       >
+
+        {/* POČETNA */}
 
         <Tabs.Screen
           name="index"
@@ -37,6 +52,8 @@ export default function TabLayout() {
         />
 
 
+        {/* PRETRAGA */}
+
         <Tabs.Screen
           name="search"
           options={{
@@ -52,6 +69,8 @@ export default function TabLayout() {
           }}
         />
 
+
+        {/* REZERVACIJE */}
 
         <Tabs.Screen
           name="reservations"
@@ -69,6 +88,8 @@ export default function TabLayout() {
         />
 
 
+        {/* LISTA ŽELJA */}
+
         <Tabs.Screen
           name="wishlist"
           options={{
@@ -84,6 +105,8 @@ export default function TabLayout() {
           }}
         />
 
+
+        {/* PROFIL */}
 
         <Tabs.Screen
           name="profile"

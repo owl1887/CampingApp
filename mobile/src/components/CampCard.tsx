@@ -6,6 +6,8 @@ import {
   View,
 } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { IMAGE_URL } from '@/services/api';
 
 type CampCardProps = {
@@ -31,7 +33,7 @@ export default function CampCard({
       activeOpacity={0.85}
     >
 
-      {/* Slika kampa */}
+      {/* SLIKA KAMPA */}
 
       {slikaUrl ? (
         <Image
@@ -44,9 +46,11 @@ export default function CampCard({
       ) : (
         <View style={styles.imagePlaceholder}>
 
-          <Text style={styles.imageIcon}>
-            ⛺
-          </Text>
+          <Ionicons
+            name="bonfire-outline"
+            size={48}
+            color="#81C784"
+          />
 
           <Text style={styles.imageText}>
             Kamp mjesto
@@ -56,7 +60,7 @@ export default function CampCard({
       )}
 
 
-      {/* Sadržaj kartice */}
+      {/* SADRŽAJ KARTICE */}
 
       <View style={styles.content}>
 
@@ -78,27 +82,44 @@ export default function CampCard({
 
         <View style={styles.bottomRow}>
 
+          {/* CIJENA */}
+
           <View>
 
             <Text style={styles.priceLabel}>
-              Cijena
+              Cijena po noći
             </Text>
 
-            <Text style={styles.price}>
-              {cijena} KM
-              <Text style={styles.priceNight}>
-                {' '} / noć
+            <View style={styles.priceRow}>
+
+              <Ionicons
+                name="pricetag-outline"
+                size={16}
+                color="#81C784"
+              />
+
+              <Text style={styles.price}>
+                {cijena} KM
               </Text>
-            </Text>
+
+            </View>
 
           </View>
 
+
+          {/* DUGME */}
 
           <View style={styles.detailsButton}>
 
             <Text style={styles.detailsButtonText}>
               Detalji
             </Text>
+
+            <Ionicons
+              name="arrow-forward-outline"
+              size={15}
+              color="#FFFFFF"
+            />
 
           </View>
 
@@ -113,14 +134,20 @@ export default function CampCard({
 
 const styles = StyleSheet.create({
 
+  /* KARTICA */
+
   card: {
     width: 285,
     borderRadius: 16,
+    backgroundColor: '#1E1E1E',
     borderWidth: 1,
+    borderColor: '#2C2C2C',
     overflow: 'hidden',
     marginRight: 15,
   },
 
+
+  /* SLIKA */
 
   campImage: {
     width: '100%',
@@ -130,22 +157,21 @@ const styles = StyleSheet.create({
 
   imagePlaceholder: {
     height: 155,
+    backgroundColor: '#17251A',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-
-
-  imageIcon: {
-    fontSize: 42,
-    marginBottom: 5,
   },
 
 
   imageText: {
     fontSize: 14,
     fontWeight: '500',
+    color: '#BDBDBD',
+    marginTop: 6,
   },
 
+
+  /* SADRŽAJ */
 
   content: {
     padding: 15,
@@ -155,6 +181,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#FFFFFF',
     marginBottom: 7,
   },
 
@@ -162,9 +189,12 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     lineHeight: 20,
+    color: '#BDBDBD',
     marginBottom: 15,
   },
 
+
+  /* DONJI RED */
 
   bottomRow: {
     flexDirection: 'row',
@@ -173,35 +203,46 @@ const styles = StyleSheet.create({
   },
 
 
+  /* CIJENA */
+
   priceLabel: {
     fontSize: 12,
-    marginBottom: 2,
+    color: '#9E9E9E',
+    marginBottom: 4,
+  },
+
+
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
 
 
   price: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#81C784',
   },
 
 
-  priceNight: {
-    fontSize: 13,
-    fontWeight: 'normal',
-  },
-
+  /* DUGME DETALJI */
 
   detailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#2E7D32',
     paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: 1,
   },
 
 
   detailsButtonText: {
     fontSize: 12,
     fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 
 });

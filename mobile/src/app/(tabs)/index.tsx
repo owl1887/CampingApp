@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import CampCard from '@/components/CampCard';
 import CampsMap from '@/components/CampsMap';
 import { getKampovi } from '@/services/api';
@@ -81,7 +83,7 @@ export default function HomeScreen() {
         <View style={styles.headerText}>
 
           <Text style={styles.welcome}>
-            Dobrodošli! 👋
+            Dobrodošli!
           </Text>
 
           <Text style={styles.subtitle}>
@@ -91,9 +93,15 @@ export default function HomeScreen() {
 
         </View>
 
-        <Text style={styles.logo}>
-          ⛺
-        </Text>
+        <View style={styles.logoContainer}>
+
+          <Ionicons
+            name="bonfire-outline"
+            size={48}
+            color="#81C784"
+          />
+
+        </View>
 
       </View>
 
@@ -130,6 +138,7 @@ export default function HomeScreen() {
 
           <ActivityIndicator
             size="large"
+            color="#81C784"
           />
 
           <Text style={styles.loadingText}>
@@ -146,6 +155,12 @@ export default function HomeScreen() {
       {error !== '' && (
 
         <View style={styles.errorContainer}>
+
+          <Ionicons
+            name="alert-circle-outline"
+            size={42}
+            color="#EF5350"
+          />
 
           <Text style={styles.error}>
             {error}
@@ -184,6 +199,7 @@ export default function HomeScreen() {
                   kamp.cijena_po_noci
                 )
               }
+
               slikaUrl={kamp.slika_url}
 
               onPress={() => {
@@ -208,9 +224,11 @@ export default function HomeScreen() {
 
         <View style={styles.emptyContainer}>
 
-          <Text style={styles.emptyIcon}>
-            ⛺
-          </Text>
+          <Ionicons
+            name="bonfire-outline"
+            size={50}
+            color="#81C784"
+          />
 
           <Text style={styles.emptyTitle}>
             Trenutno nema kamp mjesta
@@ -233,14 +251,28 @@ export default function HomeScreen() {
 
         <View style={styles.mapSection}>
 
-          <Text style={styles.sectionTitle}>
-            Kampovi na mapi
-          </Text>
+          <View style={styles.mapHeader}>
 
-          <Text style={styles.mapSubtitle}>
-            Pogledajte lokacije dostupnih
-            kamp mjesta.
-          </Text>
+            <Ionicons
+              name="location-outline"
+              size={26}
+              color="#81C784"
+            />
+
+            <View style={styles.mapHeaderText}>
+
+              <Text style={styles.sectionTitle}>
+                Kampovi na mapi
+              </Text>
+
+              <Text style={styles.mapSubtitle}>
+                Pogledajte lokacije dostupnih
+                kamp mjesta.
+              </Text>
+
+            </View>
+
+          </View>
 
           <CampsMap />
 
@@ -256,8 +288,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
 
+  /* GLAVNI KONTEJNER */
+
   container: {
     flex: 1,
+    backgroundColor: '#121212',
   },
 
 
@@ -284,8 +319,9 @@ const styles = StyleSheet.create({
 
 
   welcome: {
-    fontSize: 27,
+    fontSize: 29,
     fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 
 
@@ -293,11 +329,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
     marginTop: 7,
+    color: '#BDBDBD',
   },
 
 
-  logo: {
-    fontSize: 42,
+  logoContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
 
@@ -311,12 +353,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 
 
   sectionSubtitle: {
     fontSize: 14,
     marginTop: 4,
+    color: '#9E9E9E',
   },
 
 
@@ -338,6 +382,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 15,
     marginTop: 10,
+    color: '#BDBDBD',
   },
 
 
@@ -352,6 +397,8 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 16,
     textAlign: 'center',
+    color: '#EF5350',
+    marginTop: 10,
   },
 
 
@@ -363,21 +410,18 @@ const styles = StyleSheet.create({
   },
 
 
-  emptyIcon: {
-    fontSize: 45,
-    marginBottom: 10,
-  },
-
-
   emptyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginTop: 10,
   },
 
 
   emptyText: {
     fontSize: 14,
     marginTop: 5,
+    color: '#9E9E9E',
   },
 
 
@@ -388,10 +432,23 @@ const styles = StyleSheet.create({
   },
 
 
+  mapHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 15,
+  },
+
+
+  mapHeaderText: {
+    flex: 1,
+    marginLeft: 10,
+  },
+
+
   mapSubtitle: {
     fontSize: 14,
     marginTop: 5,
-    marginBottom: 15,
+    color: '#9E9E9E',
   },
 
 });

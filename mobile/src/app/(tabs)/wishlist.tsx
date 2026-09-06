@@ -1,7 +1,5 @@
 import { useCallback, useState } from 'react';
 
-
-
 import {
   ActivityIndicator,
   Alert,
@@ -13,10 +11,15 @@ import {
   View,
 } from 'react-native';
 
-import { useFocusEffect, useRouter } from 'expo-router';
+import {
+  useFocusEffect,
+  useRouter,
+} from 'expo-router';
 
+import { Ionicons } from '@expo/vector-icons';
 
 import { getToken } from '@/services/auth';
+
 import {
   getWishlist,
   removeFromWishlist,
@@ -52,14 +55,21 @@ export default function WishlistScreen() {
     useState(false);
 
 
+  // =====================================================
+  // UČITAVANJE LISTE ŽELJA
+  // =====================================================
+
   async function ucitajListuZelja() {
 
     try {
 
       const token = await getToken();
 
+
       if (!token) {
+
         setListaZelja([]);
+
         return;
       }
 
@@ -80,19 +90,26 @@ export default function WishlistScreen() {
         error
       );
 
+
       Alert.alert(
         'Greška',
         error.message ||
         'Nije moguće učitati listu želja.'
       );
 
+
     } finally {
 
       setLoading(false);
 
     }
+
   }
 
+
+  // =====================================================
+  // AUTOMATSKO UČITAVANJE
+  // =====================================================
 
   useFocusEffect(
     useCallback(() => {
@@ -102,6 +119,10 @@ export default function WishlistScreen() {
     }, [])
   );
 
+
+  // =====================================================
+  // OSVJEŽAVANJE LISTE
+  // =====================================================
 
   async function osvjeziListuZelja() {
 
@@ -114,13 +135,72 @@ export default function WishlistScreen() {
   }
 
 
+  // =====================================================
+  // UKLANJANJE IZ LISTE ŽELJA
+  // =====================================================
+
+  async function ukloniIzListeZelja(
+    kampId: number
+  ) {
+
+    try {
+
+      const token = await getToken();
+
+
+      if (!token) {
+
+        Alert.alert(
+          'Niste prijavljeni',
+          'Morate se prijaviti.'
+        );
+
+        return;
+      }
+
+
+      await removeFromWishlist(
+        kampId,
+        token
+      );
+
+
+      await ucitajListuZelja();
+
+
+      Alert.alert(
+        'Uspješno',
+        'Kamp je uklonjen iz liste želja.'
+      );
+
+
+    } catch (error: any) {
+
+      Alert.alert(
+        'Greška',
+        error.message ||
+        'Nije moguće ukloniti kamp iz liste želja.'
+      );
+
+    }
+
+  }
+
+
+  // =====================================================
+  // EKRAN UČITAVANJA
+  // =====================================================
+
   if (loading) {
 
     return (
 
       <View style={styles.center}>
 
-        <ActivityIndicator size="large" />
+        <ActivityIndicator
+          size="large"
+          color="#81C784"
+        />
 
         <Text style={styles.loadingText}>
           Učitavanje liste želja...
@@ -132,64 +212,69 @@ export default function WishlistScreen() {
 
   }
 
-  async function ukloniIzListeZelja(
-  kampId: number
-) {
 
-  try {
-
-    const token = await getToken();
-
-    if (!token) {
-
-      Alert.alert(
-        'Niste prijavljeni',
-        'Morate se prijaviti.'
-      );
-
-      return;
-    }
-
-    await removeFromWishlist(
-      kampId,
-      token
-    );
-
-    // Ponovo učitavamo listu
-    await ucitajListuZelja();
-
-    Alert.alert(
-      'Uspješno',
-      'Kamp je uklonjen iz liste želja.'
-    );
-
-  } catch (error: any) {
-
-    Alert.alert(
-      'Greška',
-      error.message ||
-      'Nije moguće ukloniti kamp iz liste želja.'
-    );
-
-  }
-}
-
+  // =====================================================
+  // GLAVNI EKRAN
+  // =====================================================
 
   return (
 
     <View style={styles.container}>
 
-      <Text style={styles.title}>
-        Lista želja
-      </Text>
+      {/* HEADER */}
+
+      <View style={styles.header}>
+
+        <View style={styles.headerIconContainer}>
+
+          <Ionicons
+            name="heart"
+            size={25}
+            color="#81C784"
+          />
+
+        </View>
+
+        <View>
+
+          <Text style={styles.title}>
+            Lista želja
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Sačuvani kampovi
+          </Text>
+
+        </View>
+
+      </View>
 
 
       {listaZelja.length === 0 ? (
 
+        /* PRAZNO STANJE */
+
         <View style={styles.emptyContainer}>
 
+          <View style={styles.emptyIconContainer}>
+
+            <Ionicons
+              name="heart-outline"
+              size={48}
+              color="#81C784"
+            />
+
+          </View>
+
+
+          <Text style={styles.emptyTitle}>
+            Lista želja je prazna
+          </Text>
+
+
           <Text style={styles.emptyText}>
-            Lista želja je prazna.
+            Kampove koje želite posjetiti možete
+            sačuvati u svoju listu želja.
           </Text>
 
         </View>
@@ -198,11 +283,15 @@ export default function WishlistScreen() {
 
         <ScrollView
           style={styles.list}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
 
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={osvjeziListuZelja}
+              tintColor="#81C784"
+              colors={['#81C784']}
             />
           }
         >
@@ -211,47 +300,192 @@ export default function WishlistScreen() {
             (kamp) => (
 
               <View
-  key={kamp.id}
-  style={styles.card}
->
+                key={kamp.id}
+                style={styles.card}
+              >
 
-  <Text style={styles.cardTitle}>
-    {kamp.naziv}
-  </Text>
+                {/* NASLOV KAMPA */}
 
-  <Text style={styles.description}>
-    {kamp.opis}
-  </Text>
+                <View style={styles.cardHeader}>
 
-  <Text style={styles.price}>
-    {kamp.cijena_po_noci} KM / noć
-  </Text>
+                  <View style={styles.campIconContainer}>
 
+                    <Ionicons
+                      name="bonfire-outline"
+                      size={24}
+                      color="#81C784"
+                    />
 
-  <TouchableOpacity
-    style={styles.detailsButton}
-    onPress={() =>
-      router.push(`/camp/${kamp.id}`)
-    }
-  >
-    <Text style={styles.detailsButtonText}>
-      Detalji
-    </Text>
-  </TouchableOpacity>
+                  </View>
 
 
-  <TouchableOpacity
-    style={styles.removeButton}
-    onPress={() =>
-      ukloniIzListeZelja(kamp.id)
-    }
-  >
-    <Text style={styles.removeButtonText}>
-      Ukloni iz liste želja
-    </Text>
-  </TouchableOpacity>
+                  <View style={styles.cardTitleContainer}>
 
-</View>
+                    <Text style={styles.cardTitle}>
+                      {kamp.naziv}
+                    </Text>
+
+                    <Text style={styles.savedText}>
+                      Sačuvano u listi želja
+                    </Text>
+
+                  </View>
+
+
+                  <Ionicons
+                    name="heart"
+                    size={22}
+                    color="#81C784"
+                  />
+
+                </View>
+
+
+                {/* OPIS */}
+
+                <Text style={styles.description}>
+                  {kamp.opis}
+                </Text>
+
+
+                {/* KARAKTERISTIKE */}
+
+                {kamp.karakteristike && (
+
+                  <View style={styles.features}>
+
+                    {kamp.karakteristike.wifi && (
+
+                      <View style={styles.feature}>
+
+                        <Ionicons
+                          name="wifi-outline"
+                          size={16}
+                          color="#81C784"
+                        />
+
+                        <Text style={styles.featureText}>
+                          Wi-Fi
+                        </Text>
+
+                      </View>
+
+                    )}
+
+
+                    {kamp.karakteristike.struja && (
+
+                      <View style={styles.feature}>
+
+                        <Ionicons
+                          name="flash-outline"
+                          size={16}
+                          color="#81C784"
+                        />
+
+                        <Text style={styles.featureText}>
+                          Struja
+                        </Text>
+
+                      </View>
+
+                    )}
+
+
+                    {kamp.karakteristike.parking && (
+
+                      <View style={styles.feature}>
+
+                        <Ionicons
+                          name="car-outline"
+                          size={16}
+                          color="#81C784"
+                        />
+
+                        <Text style={styles.featureText}>
+                          Parking
+                        </Text>
+
+                      </View>
+
+                    )}
+
+                  </View>
+
+                )}
+
+
+                {/* CIJENA */}
+
+                <View style={styles.priceContainer}>
+
+                  <Ionicons
+                    name="pricetag-outline"
+                    size={19}
+                    color="#81C784"
+                  />
+
+                  <Text style={styles.price}>
+                    {kamp.cijena_po_noci} KM
+                  </Text>
+
+                  <Text style={styles.priceUnit}>
+                    / noć
+                  </Text>
+
+                </View>
+
+
+                {/* DETALJI */}
+
+                <TouchableOpacity
+                  style={styles.detailsButton}
+
+                  onPress={() =>
+                    router.push(
+                      `/camp/${kamp.id}`
+                    )
+                  }
+                >
+
+                  <Ionicons
+                    name="eye-outline"
+                    size={19}
+                    color="#FFFFFF"
+                  />
+
+                  <Text style={styles.detailsButtonText}>
+                    DETALJI
+                  </Text>
+
+                </TouchableOpacity>
+
+
+                {/* UKLANJANJE */}
+
+                <TouchableOpacity
+                  style={styles.removeButton}
+
+                  onPress={() =>
+                    ukloniIzListeZelja(
+                      kamp.id
+                    )
+                  }
+                >
+
+                  <Ionicons
+                    name="heart-dislike-outline"
+                    size={19}
+                    color="#EF5350"
+                  />
+
+                  <Text style={styles.removeButtonText}>
+                    UKLONI IZ LISTE ŽELJA
+                  </Text>
+
+                </TouchableOpacity>
+
+              </View>
 
             )
           )}
@@ -263,95 +497,297 @@ export default function WishlistScreen() {
     </View>
 
   );
+
 }
 
 
+// =====================================================
+// STILOVI
+// =====================================================
+
 const styles = StyleSheet.create({
-
-  detailsButton: {
-  marginTop: 15,
-  padding: 12,
-  borderRadius: 8,
-  alignItems: 'center',
-  borderWidth: 1,
-},
-
-detailsButtonText: {
-  fontSize: 15,
-  fontWeight: 'bold',
-},
-
-  removeButton: {
-  marginTop: 15,
-  padding: 12,
-  borderRadius: 8,
-  alignItems: 'center',
-  borderWidth: 1,
-},
-
-removeButtonText: {
-  fontSize: 15,
-  fontWeight: 'bold',
-},
 
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#121212',
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
+
+
+  // =====================================================
+  // HEADER
+  // =====================================================
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+
+  headerIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+
+  title: {
+    fontSize: 27,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+
+
+  subtitle: {
+    fontSize: 14,
+    color: '#9E9E9E',
+    marginTop: 2,
+  },
+
+
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#121212',
   },
+
 
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    color: '#BDBDBD',
   },
 
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
+
+  // =====================================================
+  // LISTA
+  // =====================================================
 
   list: {
     flex: 1,
   },
 
-  card: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 15,
+
+  listContent: {
+    paddingBottom: 25,
   },
 
-  cardTitle: {
-    fontSize: 21,
-    fontWeight: 'bold',
-    marginBottom: 8,
+
+  // =====================================================
+  // KARTICA
+  // =====================================================
+
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderWidth: 1,
+    borderColor: '#2C2C2C',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
   },
+
+
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+
+  campIconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+
+  cardTitleContainer: {
+    flex: 1,
+  },
+
+
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+
+
+  savedText: {
+    fontSize: 12,
+    color: '#757575',
+    marginTop: 3,
+  },
+
 
   description: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 10,
+    color: '#BDBDBD',
+    marginBottom: 12,
   },
 
-  price: {
-    fontSize: 17,
-    fontWeight: 'bold',
+
+  // =====================================================
+  // KARAKTERISTIKE
+  // =====================================================
+
+  features: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
   },
+
+
+  feature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#181818',
+    borderWidth: 1,
+    borderColor: '#2C2C2C',
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    marginRight: 7,
+    marginBottom: 6,
+  },
+
+
+  featureText: {
+    fontSize: 12,
+    color: '#BDBDBD',
+    marginLeft: 5,
+  },
+
+
+  // =====================================================
+  // CIJENA
+  // =====================================================
+
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    borderTopWidth: 1,
+    borderTopColor: '#2C2C2C',
+    paddingTop: 13,
+    marginBottom: 14,
+  },
+
+
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#81C784',
+    marginLeft: 7,
+  },
+
+
+  priceUnit: {
+    fontSize: 14,
+    color: '#9E9E9E',
+    marginLeft: 4,
+  },
+
+
+  // =====================================================
+  // DETALJI
+  // =====================================================
+
+  detailsButton: {
+    backgroundColor: '#2E7D32',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+
+
+  detailsButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginLeft: 7,
+  },
+
+
+  // =====================================================
+  // UKLANJANJE
+  // =====================================================
+
+  removeButton: {
+    backgroundColor: '#1E1E1E',
+    borderWidth: 1,
+    borderColor: '#5A2929',
+    paddingVertical: 11,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: 9,
+  },
+
+
+  removeButtonText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#EF5350',
+    marginLeft: 7,
+  },
+
+
+  // =====================================================
+  // PRAZNO STANJE
+  // =====================================================
 
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingBottom: 60,
   },
 
+
+  emptyIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#1B3320',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+
+
+  emptyTitle: {
+    fontSize: 21,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+
+
   emptyText: {
-    fontSize: 17,
+    fontSize: 15,
+    color: '#9E9E9E',
+    textAlign: 'center',
+    lineHeight: 21,
   },
 
 });
