@@ -953,6 +953,8 @@ router.put(
     requireAdmin,
     async (req, res) => {
 
+        const client = await pool.connect();
+
         try {
 
             const rezervacija_id =
@@ -961,6 +963,10 @@ router.put(
             const { status } =
                 req.body;
 
+
+            // =================================================
+            // 1. Dozvoljeni statusi
+            // =================================================
 
             const dozvoljeniStatusi = [
                 'aktivna',
@@ -981,11 +987,16 @@ router.put(
             }
 
 
+            // =================================================
+            // 2. Dohvaćanje postojeće rezervacije
+            // =================================================
+
             const postojecaRezervacija =
-                await pool.query(
+                await client.query(
                     `
                     SELECT
                         id,
+                        kamp_id,
                         status
 
                     FROM rezervacije
@@ -1010,12 +1021,143 @@ router.put(
             }
 
 
+            const rezervacija =
+                postojecaRezervacija.rows[0];
+
+
+            const stariStatus =
+                rezervacija.status;
+
+
+            // =================================================
+            // 3. Ako je status isti - nema potrebe za izmjenom
+            // =================================================
+
+            if (
+                stariStatus === status
+            ) {
+
+                return res.status(400).json({
+                    error:
+                        `Rezervacija već ima status '${status}'.`
+                });
+
+            }
+
+
+            // =================================================
+            // 4. Nije dozvoljeno ponovno aktiviranje
+            //    otkazane ili završene rezervacije
+            // =================================================
+
+            if (
+                status === 'aktivna' &&
+                (
+                    stariStatus === 'otkazana' ||
+                    stariStatus === 'zavrsena'
+                )
+            ) {
+
+                return res.status(400).json({
+                    error:
+                        'Otkazana ili završena rezervacija ne može ponovo biti aktivirana.'
+                });
+
+            }
+
+
+            // =================================================
+            // 5. Nije dozvoljeno mijenjati završenu rezervaciju
+            // =================================================
+
+            if (
+                stariStatus === 'zavrsena'
+            ) {
+
+                return res.status(400).json({
+                    error:
+                        'Završena rezervacija se više ne može mijenjati.'
+                });
+
+            }
+
+
+            // =================================================
+            // 6. Početak transakcije
+            // =================================================
+
+            await client.query(
+                'BEGIN'
+            );
+
+
+            // =================================================
+            // 7. Ako aktivnu rezervaciju otkazujemo,
+            //    vraćamo opremu u inventar
+            // =================================================
+
+            if (
+                stariStatus === 'aktivna' &&
+                status === 'otkazana'
+            ) {
+
+                const opremaResult =
+                    await client.query(
+                        `
+                        SELECT
+                            oprema_id,
+                            kolicina
+
+                        FROM rezervacija_oprema
+
+                        WHERE rezervacija_id = $1;
+                        `,
+                        [
+                            rezervacija_id
+                        ]
+                    );
+
+
+                // ---------------------------------------------
+                // Vraćanje svake opreme
+                // ---------------------------------------------
+
+                for (
+                    const stavka
+                    of opremaResult.rows
+                ) {
+
+                    await client.query(
+                        `
+                        UPDATE oprema
+
+                        SET kolicina =
+                            kolicina + $1
+
+                        WHERE id = $2;
+                        `,
+                        [
+                            stavka.kolicina,
+                            stavka.oprema_id
+                        ]
+                    );
+
+                }
+
+            }
+
+
+            // =================================================
+            // 8. Promjena statusa rezervacije
+            // =================================================
+
             const result =
-                await pool.query(
+                await client.query(
                     `
                     UPDATE rezervacije
 
-                    SET status = $1
+                    SET status = $1,
+                        updated_at = CURRENT_TIMESTAMP
 
                     WHERE id = $2
 
@@ -1027,6 +1169,19 @@ router.put(
                     ]
                 );
 
+
+            // =================================================
+            // 9. Potvrda transakcije
+            // =================================================
+
+            await client.query(
+                'COMMIT'
+            );
+
+
+            // =================================================
+            // 10. Odgovor
+            // =================================================
 
             res.json({
 
@@ -1041,22 +1196,281 @@ router.put(
 
         } catch (error) {
 
+            // =================================================
+            // ROLLBACK ako dođe do greške
+            // =================================================
+
+            try {
+
+                await client.query(
+                    'ROLLBACK'
+                );
+
+            } catch (rollbackError) {
+
+                console.error(
+                    'Greška pri ROLLBACK:',
+                    rollbackError
+                );
+
+            }
+
+
             console.error(
-                'Greška pri promjeni statusa:',
+                'Greška pri promjeni statusa rezervacije:',
                 error
             );
 
 
             res.status(500).json({
                 error:
-                    'Greška na serveru.'
+                    'Greška pri promjeni statusa rezervacije.'
             });
+
+
+        } finally {
+
+            client.release();
 
         }
 
     }
 );
 
+// =====================================================
+// PUT /api/rezervacije/admin/:id/zavrsi
+// Administrator završava rezervaciju
+// i vraća rezervisanu opremu u inventar
+// =====================================================
+
+router.put(
+    '/admin/:id/zavrsi',
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+
+        const client = await pool.connect();
+
+        try {
+
+            const rezervacija_id =
+                req.params.id;
+
+
+            // =================================================
+            // 1. Dohvaćanje rezervacije
+            // =================================================
+
+            const rezervacijaResult =
+                await client.query(
+                    `
+                    SELECT
+                        id,
+                        status
+
+                    FROM rezervacije
+
+                    WHERE id = $1;
+                    `,
+                    [
+                        rezervacija_id
+                    ]
+                );
+
+
+            if (
+                rezervacijaResult.rows.length === 0
+            ) {
+
+                return res.status(404).json({
+                    error:
+                        'Rezervacija nije pronađena.'
+                });
+
+            }
+
+
+            const rezervacija =
+                rezervacijaResult.rows[0];
+
+
+            // =================================================
+            // 2. Rezervacija mora biti aktivna
+            // =================================================
+
+            if (
+                rezervacija.status !== 'aktivna'
+            ) {
+
+                return res.status(400).json({
+                    error:
+                        'Samo aktivna rezervacija može biti završena.'
+                });
+
+            }
+
+
+            // =================================================
+            // 3. Početak transakcije
+            // =================================================
+
+            await client.query(
+                'BEGIN'
+            );
+
+
+            // =================================================
+            // 4. Dohvaćanje rezervisane opreme
+            // =================================================
+
+            const opremaResult =
+                await client.query(
+                    `
+                    SELECT
+                        oprema_id,
+                        kolicina
+
+                    FROM rezervacija_oprema
+
+                    WHERE rezervacija_id = $1;
+                    `,
+                    [
+                        rezervacija_id
+                    ]
+                );
+
+
+            // =================================================
+            // 5. Vraćanje opreme u inventar
+            // =================================================
+
+            for (
+                const stavka
+                of opremaResult.rows
+            ) {
+
+                await client.query(
+                    `
+                    UPDATE oprema
+
+                    SET kolicina =
+                        kolicina + $1
+
+                    WHERE id = $2;
+                    `,
+                    [
+                        stavka.kolicina,
+                        stavka.oprema_id
+                    ]
+                );
+
+            }
+
+
+            // =================================================
+            // 6. Promjena statusa rezervacije
+            // =================================================
+
+            const updateResult =
+                await client.query(
+                    `
+                    UPDATE rezervacije
+
+                    SET status = 'zavrsena',
+                        updated_at = CURRENT_TIMESTAMP
+
+                    WHERE id = $1
+                      AND status = 'aktivna'
+
+                    RETURNING *;
+                    `,
+                    [
+                        rezervacija_id
+                    ]
+                );
+
+
+            // =================================================
+            // 7. Provjera da je status stvarno promijenjen
+            // =================================================
+
+            if (
+                updateResult.rows.length === 0
+            ) {
+
+                throw new Error(
+                    'Rezervacija više nije aktivna.'
+                );
+
+            }
+
+
+            // =================================================
+            // 8. Potvrda transakcije
+            // =================================================
+
+            await client.query(
+                'COMMIT'
+            );
+
+
+            // =================================================
+            // 9. Odgovor
+            // =================================================
+
+            res.json({
+
+                message:
+                    'Rezervacija je uspješno završena, a oprema je vraćena u inventar.',
+
+                rezervacija:
+                    updateResult.rows[0]
+
+            });
+
+
+        } catch (error) {
+
+            // =================================================
+            // ROLLBACK
+            // =================================================
+
+            try {
+
+                await client.query(
+                    'ROLLBACK'
+                );
+
+            } catch (rollbackError) {
+
+                console.error(
+                    'Greška pri ROLLBACK:',
+                    rollbackError
+                );
+
+            }
+
+
+            console.error(
+                'Greška pri završavanju rezervacije:',
+                error
+            );
+
+
+            res.status(500).json({
+                error:
+                    'Greška pri završavanju rezervacije.'
+            });
+
+
+        } finally {
+
+            client.release();
+
+        }
+
+    }
+);
 
 // =====================================================
 // DELETE /api/rezervacije/:id

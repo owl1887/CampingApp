@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./jobs/autoFinishReservations');
 const express = require('express');
 const cors = require('cors');
 
