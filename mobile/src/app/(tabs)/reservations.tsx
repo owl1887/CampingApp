@@ -42,8 +42,19 @@ type Rezervacija = {
 
   latitude: string;
   longitude: string;
+  oprema: RezervacijaOprema[];
 };
 
+type RezervacijaOprema = {
+  id: string;
+  oprema_id: string;
+  naziv: string;
+  opis: string;
+  kolicina: number;
+  cijena_po_jedinici: string;
+  broj_dana: number;
+  ukupna_cijena: string;
+};
 
 export default function ReservationsScreen() {
 
@@ -365,6 +376,50 @@ export default function ReservationsScreen() {
                   {rezervacija.ukupna_cijena} KM
                 </Text>
 
+                {/* DODATNA OPREMA */}
+
+{rezervacija.oprema &&
+  rezervacija.oprema.length > 0 && (
+
+    <View style={styles.equipmentSection}>
+
+      <Text style={styles.equipmentTitle}>
+        Dodatna oprema
+      </Text>
+
+      {rezervacija.oprema.map(
+        (stavka) => (
+
+          <View
+            key={stavka.id}
+            style={styles.equipmentItem}
+          >
+
+            <Text style={styles.equipmentName}>
+              {stavka.naziv} × {stavka.kolicina}
+            </Text>
+
+            <Text style={styles.equipmentDetails}>
+              {Number(
+                stavka.cijena_po_jedinici
+              ).toFixed(2)} KM × {stavka.kolicina} × {stavka.broj_dana} dana
+            </Text>
+
+            <Text style={styles.equipmentTotal}>
+              {Number(
+                stavka.ukupna_cijena
+              ).toFixed(2)} KM
+            </Text>
+
+          </View>
+
+        )
+      )}
+
+    </View>
+
+  )}
+
 
                 {/* STATUS */}
 
@@ -436,6 +491,39 @@ export default function ReservationsScreen() {
 // =====================================================
 
 const styles = StyleSheet.create({
+  equipmentSection: {
+  marginTop: 12,
+  marginBottom: 8,
+},
+
+equipmentTitle: {
+  fontSize: 17,
+  fontWeight: 'bold',
+  marginBottom: 8,
+},
+
+equipmentItem: {
+  borderWidth: 1,
+  borderRadius: 8,
+  padding: 10,
+  marginBottom: 7,
+},
+
+equipmentName: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  marginBottom: 4,
+},
+
+equipmentDetails: {
+  fontSize: 13,
+  marginBottom: 3,
+},
+
+equipmentTotal: {
+  fontSize: 14,
+  fontWeight: 'bold',
+},
 
   container: {
     flex: 1,
