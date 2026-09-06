@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import {
-ActivityIndicator,
-Alert,
-ScrollView,
-StyleSheet,
-Text,
-TouchableOpacity,
-View,
+ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -19,8 +13,7 @@ Marker,
 } from '@maplibre/maplibre-react-native';
 
 import {
-getKampById,
-addToWishlist,
+getKampById, addToWishlist, IMAGE_URL,
 } from '@/services/api';
 
 import { getToken } from '@/services/auth';
@@ -55,6 +48,7 @@ karakteristike?: Karakteristike;
 
 latitude?: number;
 longitude?: number;
+slika_url?: string;
 };
 
 export default function CampDetailsScreen() {
@@ -241,9 +235,17 @@ return (
   contentContainerStyle={styles.scrollContent}
 >
 
-  {/* ========================================= */}
-  {/* SLIKA */}
-  {/* ========================================= */}
+  {kamp.slika_url ? (
+
+  <Image
+    source={{
+      uri: `${IMAGE_URL}${kamp.slika_url}`,
+    }}
+    style={styles.campImage}
+    resizeMode="cover"
+  />
+
+) : (
 
   <View style={styles.imagePlaceholder}>
 
@@ -252,6 +254,8 @@ return (
     </Text>
 
   </View>
+
+)}
 
 
   <View style={styles.content}>
@@ -573,6 +577,9 @@ return (
 
 const styles = StyleSheet.create({
 
+campImage: { width: '100%', height: 250, },
+  imagePlaceholder: { height: 250, justifyContent: 'center', alignItems: 'center', },
+
 container: {
 flex: 1,
 },
@@ -598,11 +605,7 @@ fontSize: 16,
 textAlign: 'center',
 },
 
-imagePlaceholder: {
-height: 250,
-justifyContent: 'center',
-alignItems: 'center',
-},
+
 
 imageText: {
 fontSize: 20,
