@@ -1,14 +1,18 @@
 import {
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import { IMAGE_URL } from '@/services/api';
+
 type CampCardProps = {
   naziv: string;
   opis: string;
   cijena: number;
+  slikaUrl?: string;
   onPress?: () => void;
 };
 
@@ -16,11 +20,11 @@ export default function CampCard({
   naziv,
   opis,
   cijena,
+  slikaUrl,
   onPress,
 }: CampCardProps) {
 
   return (
-
     <TouchableOpacity
       style={styles.card}
       onPress={onPress}
@@ -29,17 +33,27 @@ export default function CampCard({
 
       {/* Slika kampa */}
 
-      <View style={styles.imagePlaceholder}>
+      {slikaUrl ? (
+        <Image
+          source={{
+            uri: `${IMAGE_URL}${slikaUrl}`,
+          }}
+          style={styles.campImage}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.imagePlaceholder}>
 
-        <Text style={styles.imageIcon}>
-          ⛺
-        </Text>
+          <Text style={styles.imageIcon}>
+            ⛺
+          </Text>
 
-        <Text style={styles.imageText}>
-          Kamp mjesto
-        </Text>
+          <Text style={styles.imageText}>
+            Kamp mjesto
+          </Text>
 
-      </View>
+        </View>
+      )}
 
 
       {/* Sadržaj kartice */}
@@ -83,7 +97,7 @@ export default function CampCard({
           <View style={styles.detailsButton}>
 
             <Text style={styles.detailsButtonText}>
-              DETALJI
+              Detalji
             </Text>
 
           </View>
@@ -105,6 +119,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: 'hidden',
     marginRight: 15,
+  },
+
+
+  campImage: {
+    width: '100%',
+    height: 155,
   },
 
 

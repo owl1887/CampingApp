@@ -18,6 +18,7 @@ type Kamp = {
   naziv: string;
   opis: string;
   cijena_po_noci: number;
+  slika_url?: string;
 };
 
 export default function HomeScreen() {
@@ -183,6 +184,7 @@ export default function HomeScreen() {
                   kamp.cijena_po_noci
                 )
               }
+              slikaUrl={kamp.slika_url}
 
               onPress={() => {
                 router.push(
