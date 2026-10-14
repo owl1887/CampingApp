@@ -98,9 +98,12 @@ export default function ReservationDetailsScreen() {
           );
 
 
-        setRezervacija(
-          data.rezervacija
-        );
+        
+setRezervacija({
+  ...data.rezervacija,
+  oprema: data.oprema ?? [],
+});
+
 
 
       } catch (error: any) {
