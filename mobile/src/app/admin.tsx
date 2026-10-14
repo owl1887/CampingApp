@@ -282,7 +282,7 @@ export default function AdminScreen() {
         <View style={styles.headerText}>
 
           <Text style={styles.title}>
-            Administracija
+            Admin panel
           </Text>
 
           <Text style={styles.welcome}>

@@ -487,7 +487,7 @@ export default function ProfileScreen() {
           />
 
           <Text style={styles.adminButtonText}>
-            ADMINISTRACIJA
+            ADMIN PANEL
           </Text>
 
           <Ionicons
