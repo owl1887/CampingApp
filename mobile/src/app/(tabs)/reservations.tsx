@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   ActivityIndicator,
@@ -71,57 +72,76 @@ export default function ReservationsScreen() {
   const [refreshing, setRefreshing] =
     useState(false);
 
+    const [sveRezervacije, setSveRezervacije] = useState<Rezervacija[]>([]);
+
 
   // =====================================================
   // UČITAVANJE REZERVACIJA
   // =====================================================
 
-  async function ucitajRezervacije() {
+  
+async function ucitajRezervacije() {
+  try {
+    const token = await getToken();
 
-    try {
-
-      const token = await getToken();
-
-
-      if (!token) {
-
-        setRezervacije([]);
-
-        return;
-      }
-
-
-      const data =
-        await getMojeRezervacije(token);
-
-
-      setRezervacije(
-        data.rezervacije || []
-      );
-
-
-    } catch (error: any) {
-
-      console.error(
-        'Greška pri učitavanju rezervacija:',
-        error
-      );
-
-
-      Alert.alert(
-        'Greška',
-        error.message ||
-        'Nije moguće učitati rezervacije.'
-      );
-
-
-    } finally {
-
-      setLoading(false);
-
+    if (!token) {
+      setRezervacije([]);
+      setSveRezervacije([]);
+      return;
     }
 
+    // Dohvatanje podataka o prijavljenom korisniku
+    const korisnikJSON = await AsyncStorage.getItem('korisnik');
+
+    if (!korisnikJSON) {
+      setRezervacije([]);
+      setSveRezervacije([]);
+      return;
+    }
+
+    const korisnik = JSON.parse(korisnikJSON);
+
+    // Svaki korisnik ima zasebnu listu skrivenih rezervacija
+    const kljuc = `skrivene_rezervacije_${korisnik.id}`;
+
+    const skriveneJSON = await AsyncStorage.getItem(kljuc);
+
+    const skriveneID: string[] = skriveneJSON
+      ? JSON.parse(skriveneJSON).map(String)
+      : [];
+
+    // Učitavanje svih rezervacija sa servera
+    const data = await getMojeRezervacije(token);
+
+    const sve: Rezervacija[] = data.rezervacije || [];
+
+    // Čuvanje svih učitanih rezervacija u stanju
+    setSveRezervacije(sve);
+
+    // Prikazivanje samo rezervacija koje nisu sakrivene
+    setRezervacije(
+      sve.filter(
+        (r) => !skriveneID.includes(String(r.id))
+      )
+    );
+
+  } catch (error: any) {
+    console.error(
+      'Greška pri učitavanju rezervacija:',
+      error
+    );
+
+    Alert.alert(
+      'Greška',
+      error.message ||
+        'Nije moguće učitati rezervacije.'
+    );
+
+  } finally {
+    setLoading(false);
   }
+}
+
 
 
   // =====================================================
@@ -216,6 +236,81 @@ export default function ReservationsScreen() {
     );
 
   }
+
+  //ocisti listu
+
+async function ocistiListu() {
+  Alert.alert(
+    'Očisti listu',
+    'Želite li sakriti sve svoje rezervacije sa ovog ekrana? Rezervacije ostaju sačuvane u bazi.',
+    [
+      {
+        text: 'Odustani',
+        style: 'cancel',
+      },
+      {
+        text: 'Očisti',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const korisnikJSON =
+              await AsyncStorage.getItem('korisnik');
+
+            if (!korisnikJSON) {
+              Alert.alert(
+                'Greška',
+                'Nije moguće utvrditi prijavljenog korisnika.'
+              );
+              return;
+            }
+
+            const korisnik = JSON.parse(korisnikJSON);
+            const kljuc =
+              `skrivene_rezervacije_${korisnik.id}`;
+
+            const postojeceJSON =
+              await AsyncStorage.getItem(kljuc);
+
+            const postojece: string[] = postojeceJSON
+              ? JSON.parse(postojeceJSON).map(String)
+              : [];
+
+            const noviID = Array.from(
+              new Set([
+                ...postojece,
+                ...sveRezervacije.map(
+                  (r) => String(r.id)
+                ),
+              ])
+            );
+
+            await AsyncStorage.setItem(
+              kljuc,
+              JSON.stringify(noviID)
+            );
+
+            setRezervacije([]);
+
+            Alert.alert(
+              'Uspješno',
+              'Lista rezervacija je očišćena. Podaci u bazi nisu obrisani.'
+            );
+          } catch (error) {
+            console.error(
+              'Greška pri čišćenju liste:',
+              error
+            );
+
+            Alert.alert(
+              'Greška',
+              'Nije moguće očistiti listu rezervacija.'
+            );
+          }
+        },
+      },
+    ]
+  );
+}
 
 
   // =====================================================
@@ -364,6 +459,28 @@ export default function ReservationsScreen() {
         </View>
 
       </View>
+
+
+
+{rezervacije.length > 0 && (
+  <TouchableOpacity
+    style={styles.clearButton}
+    onPress={ocistiListu}
+  >
+    <Ionicons
+      name="trash-outline"
+      size={18}
+      color="#EF5350"
+    />
+
+    <Text style={styles.clearButtonText}>
+      OČISTI LISTU
+    </Text>
+  </TouchableOpacity>
+)}
+
+
+
 
 
       {rezervacije.length === 0 ? (
@@ -1107,6 +1224,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: 7,
   },
+
+
+clearButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 12,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: '#5A2929',
+  backgroundColor: '#1E1E1E',
+  marginBottom: 16,
+},
+
+clearButtonText: {
+  marginLeft: 8,
+  fontSize: 13,
+  fontWeight: 'bold',
+  color: '#EF5350',
+},
 
 
   // =====================================================
