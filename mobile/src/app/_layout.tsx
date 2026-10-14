@@ -116,7 +116,7 @@ export default function RootLayout() {
 <Stack.Screen
   name="admin"
   options={{
-    title: 'Admin panel',
+    title: 'Admin',
     headerStyle: {
       backgroundColor: '#121212',
     },

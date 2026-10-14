@@ -182,13 +182,13 @@ export default function AdminScreen() {
     } catch (error) {
 
       console.error(
-        'Greška pri učitavanju admin panela:',
+        'Greška pri učitavanju administratorske stranice:',
         error
       );
 
       Alert.alert(
         'Greška',
-        'Nije moguće učitati administratorski panel.'
+        'Nije moguće učitati administratorsku stranicu.'
       );
 
     } finally {
@@ -220,7 +220,7 @@ export default function AdminScreen() {
         />
 
         <Text style={styles.loadingText}>
-          Učitavanje admin panela...
+          Učitavanje admin stranice...
         </Text>
 
       </View>
@@ -282,7 +282,7 @@ export default function AdminScreen() {
         <View style={styles.headerText}>
 
           <Text style={styles.title}>
-            Admin panel
+            Administracija
           </Text>
 
           <Text style={styles.welcome}>
