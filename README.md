@@ -1,7 +1,7 @@
 A camp reservation mobile application built with React Native, Expo, Node.js, Express, and PostgreSQL.
 
-CampingApp is a project designed to simplify the process of discovering campsites, checking their details, and managing reservations. 
-The application provides a mobile interface for users and a separate set of administrative features for managing camps, reservations, users, and rental equipment.
+This is a project designed to simplify the process of discovering campsites, checking their details, and managing reservations. 
+The application provides a mobile interface for users and administrative features for managing camps, reservations, users, and rental equipment.
 
 User features
 
